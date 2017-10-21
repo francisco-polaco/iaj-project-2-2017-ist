@@ -85,7 +85,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
         {
             //this is where you process a child node 
             var childNode = GenerateChildNodeRecord(parentNode, connectionEdge);
-            var childNodeStatus = childNode.status;
 
             var open = Open.SearchInOpen(childNode);
             var close = Closed.SearchInClosed(childNode);
@@ -95,7 +94,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             }
             else if (open != null)
             {
-                //var searchInOpen = Open.SearchInOpen(childNode);
                 if (open.fValue > childNode.fValue)
                 {
                     Open.Replace(open, childNode);
@@ -104,35 +102,13 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             }
             else if (close != null)
             {
-                //var searchInClosed = Closed.SearchInClosed(childNode);
                 if (close.fValue > childNode.fValue)
                 {
                     Closed.RemoveFromClosed(close);
                     Open.AddToOpen(childNode);
                 }
             }
-
-            //if (childNodeStatus != NodeStatus.Open && childNodeStatus != NodeStatus.Closed)
-            //{
-            //    Open.AddToOpen(childNode);
-            //}
-            //else if (childNodeStatus == NodeStatus.Open)
-            //{
-            //    var searchInOpen = Open.SearchInOpen(childNode);
-            //    if (searchInOpen.fValue > childNode.fValue)
-            //    {
-            //        Open.Replace(searchInOpen, childNode);
-            //    }
-            //}
-            //else if (childNodeStatus == NodeStatus.Closed)
-            //{
-            //    var searchInClosed = Closed.SearchInClosed(childNode);
-            //    if (searchInClosed.fValue > childNode.fValue)
-            //    {
-            //        Closed.RemoveFromClosed(searchInClosed);
-            //        Open.AddToOpen(childNode);
-            //    }
-            //}
+            
         }
 
         public bool Search(out GlobalPath solution, bool returnPartialSolution = false)

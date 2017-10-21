@@ -20,9 +20,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
 
         protected override void ProcessChildNode(NodeRecord bestNode, NavigationGraphEdge connectionEdge)
         {
-            float f;
-            float g;
-            float h;
 
             var childNode = connectionEdge.ToNode;
             var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
@@ -42,9 +39,39 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                 this.NodeRecordArray.AddSpecialCaseNode(childNodeRecord);
             }
 
-            //TODO: implement the rest of your code here
+            var childNodeStatus = childNodeRecord.status;
+            float g = bestNode.gValue + (childNode.LocalPosition - bestNode.node.LocalPosition).magnitude;
+            float h = this.Heuristic.H(childNode, this.GoalNode);
+            float f = F(g, h);
+
+            //We can only update inside the ifs because otherwise we might be making the node worse
+
+            if (childNodeStatus == NodeStatus.Unvisited)
+            {
+                UpdateNode(bestNode, childNodeRecord, g, h, f);
+                Open.AddToOpen(childNodeRecord);
+            }
+            else if (childNodeStatus == NodeStatus.Open && childNodeRecord.fValue > f)
+            {
+                UpdateNode(bestNode, childNodeRecord, g, h, f);
+                Open.Replace(childNodeRecord, childNodeRecord);
+            }
+            else if (childNodeStatus == NodeStatus.Closed && childNodeRecord.fValue > f)
+            {
+                UpdateNode(bestNode, childNodeRecord, g, h, f);
+                Closed.RemoveFromClosed(childNodeRecord);
+                Open.AddToOpen(childNodeRecord);
+            }
         }
-            
+
+        private void UpdateNode(NodeRecord bestNode, NodeRecord childNode, float g, float h, float f)
+        {
+            childNode.gValue = g;
+            childNode.hValue = h;
+            childNode.fValue = f;
+            childNode.parent = bestNode;
+        }
+
         private List<NavigationGraphNode> GetNodesHack(NavMeshPathGraph graph)
         {
             //this hack is needed because in order to implement NodeArrayA* you need to have full acess to all the nodes in the navigation graph in the beginning of the search

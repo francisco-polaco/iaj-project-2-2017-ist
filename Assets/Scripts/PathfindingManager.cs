@@ -50,10 +50,13 @@ public class PathfindingManager : MonoBehaviour {
 	void Awake ()
 	{
         this.currentClickNumber = 1;
-         
-		this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], 
-            new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], 
-            new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic()));
+        // TODO AMARAL: With a pressing with a key choose the structure to profile 
+        this.Initialize(NavigationManager.Instance.NavMeshGraphs[0],
+        new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0],
+        new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic()));
+        //this.Initialize(NavigationManager.Instance.NavMeshGraphs[0],
+        //       new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0],
+        //           new EuclidianHeuristic()));
     }
 
     // Update is called once per frame

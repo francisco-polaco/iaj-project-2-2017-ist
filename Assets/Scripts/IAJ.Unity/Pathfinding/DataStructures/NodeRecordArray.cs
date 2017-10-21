@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RAIN.Navigation.Graph;
 
 namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures
@@ -67,80 +68,82 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures
 
         void IClosedSet.Initialize()
         {
-            //TODO implement
-            throw new NotImplementedException();
         }
 
         public void AddToOpen(NodeRecord nodeRecord)
         {
-            //TODO implement
-            throw new NotImplementedException();
+            Open.AddToOpen(nodeRecord);
+            nodeRecord.status = NodeStatus.Open;
         }
 
         public void AddToClosed(NodeRecord nodeRecord)
         {
-            //TODO implement
-            throw new NotImplementedException();
+            nodeRecord.status = NodeStatus.Closed;
         }
 
         public NodeRecord SearchInOpen(NodeRecord nodeRecord)
         {
-            //TODO implement
-            throw new NotImplementedException();
+            if (nodeRecord.status == NodeStatus.Open)
+            {
+                return nodeRecord;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public NodeRecord SearchInClosed(NodeRecord nodeRecord)
         {
-            //TODO implement
-            throw new NotImplementedException();
+            if (nodeRecord.status == NodeStatus.Closed)
+            {
+                return nodeRecord;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public NodeRecord GetBestAndRemove()
         {
-            //TODO implement
-            throw new NotImplementedException();
+            return Open.GetBestAndRemove();
         }
 
         public NodeRecord PeekBest()
         {
-            //TODO implement
-            throw new NotImplementedException();
+            return Open.PeekBest();
         }
 
         public void Replace(NodeRecord nodeToBeReplaced, NodeRecord nodeToReplace)
         {
-            //TODO implement
-            throw new NotImplementedException();
+            Open.Replace(nodeToBeReplaced, nodeToReplace);
         }
 
         public void RemoveFromOpen(NodeRecord nodeRecord)
         {
-            //TODO implement
-            throw new NotImplementedException();
+            Open.RemoveFromOpen(nodeRecord);
+            nodeRecord.status = NodeStatus.Unvisited;
         }
 
         public void RemoveFromClosed(NodeRecord nodeRecord)
         {
-            //TODO implement
-            throw new NotImplementedException();
+            nodeRecord.status = NodeStatus.Unvisited;
         }
 
         ICollection<NodeRecord> IOpenSet.All()
         {
-            //TODO implement
-            throw new NotImplementedException();
+            return Open.All();
         }
 
         ICollection<NodeRecord> IClosedSet.All()
         {
-            //TODO implement
-            throw new NotImplementedException();
+            return NodeRecords.Where(nodeRecord => nodeRecord.status == NodeStatus.Closed).ToList();
         }
 
         public int CountOpen()
         {
-            //TODO implement
-            throw new NotImplementedException();
+            return Open.CountOpen();
         }
     }
 }
