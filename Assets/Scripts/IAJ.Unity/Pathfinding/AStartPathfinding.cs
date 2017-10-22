@@ -81,7 +81,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
 
         public float PureTotalTime { get; set; }
 
-        protected virtual void ProcessChildNode(NodeRecord parentNode, NavigationGraphEdge connectionEdge)
+        protected virtual void ProcessChildNode(NodeRecord parentNode, NavigationGraphEdge connectionEdge, int edgeIndex)
         {
             //this is where you process a child node 
             var childNode = GenerateChildNodeRecord(parentNode, connectionEdge);
@@ -131,7 +131,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                 var outConnections = bestNode.node.OutEdgeCount;
                 for (int i = 0; i < outConnections; i++)
                 {
-                    ProcessChildNode(bestNode, bestNode.node.EdgeOut(i));
+                    ProcessChildNode(bestNode, bestNode.node.EdgeOut(i), i);
                 }
 
                 if (returnPartialSolution && count == NodesPerFrame)

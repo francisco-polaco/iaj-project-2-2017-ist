@@ -18,7 +18,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             this.Closed = this.NodeRecordArray;
         }
 
-        protected override void ProcessChildNode(NodeRecord bestNode, NavigationGraphEdge connectionEdge)
+        protected override void ProcessChildNode(NodeRecord bestNode, NavigationGraphEdge connectionEdge, int edgeIndex)
         {
 
             var childNode = connectionEdge.ToNode;
