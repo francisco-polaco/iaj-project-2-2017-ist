@@ -3,13 +3,14 @@ using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding;
 using RAIN.Navigation.Graph;
 using RAIN.Navigation.NavMesh;
 using System.Collections.Generic;
+using UnityEngine.Assertions.Comparers;
 
 namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 {
     //The Dijkstra algorithm is similar to the A* but with a couple of differences
     //1) no heuristic function
     //2) it will not stop until the open list is empty
-    //3) we dont need to execute the algorithm in multiple steps (because it will be executed offline)
+    //3) we don't need to execute the algorithm in multiple steps (because it will be executed offline)
     //4) we don't need to return any path (partial or complete)
     //5) we don't need to do anything when a node is already in closed
     public class GoalBoundsDijkstraMapFlooding
@@ -34,14 +35,70 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         public void Search(NavigationGraphNode startNode, NodeGoalBounds nodeGoalBounds)
         {
-			//TODO: Implement the algorithm that calculates the goal bounds using a dijkstra
-			//Given that the nodes in the graph correspond to the edges of a polygon, we won't be able to use the vertices of the polygon to update the bounding boxes
+            var nodeRecords = NodeRecordArray.NodeRecords;
+            for (int i = 0; i < nodeRecords.Length; i++)
+            {
+                nodeRecords[i].gValue = float.MaxValue;
+            }
+
+            var startNodeRecord = this.NodeRecordArray.GetNodeRecord(startNode);
+            startNodeRecord.gValue = 0;
+
+            while (Open.CountOpen() > 0)
+            {
+                var bestNode = Open.GetBestAndRemove();
+                Closed.AddToClosed(bestNode);
+                var outConnections = bestNode.node.OutEdgeCount;
+                for (int i = 0; i < outConnections; i++)
+                {
+                    ProcessChildNode(bestNode, bestNode.node.EdgeOut(i), i);
+                }
+
+            }
+            //TODO: Implement the algorithm that calculates the goal bounds using a dijkstra
+            // Given that the nodes in the graph correspond to the edges of a polygon, 
+            // we won't be able to use the vertices of the polygon to update the bounding boxes
         }
 
        
         protected void ProcessChildNode(NodeRecord parent, NavigationGraphEdge connectionEdge, int connectionIndex)
         {
-			//TODO: Implement this method that processes a child node. Then you can use it in the Search method above.
+            NavigationGraphNode childNode = connectionEdge.ToNode;
+            var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
+            if (childNodeRecord == null)
+            {
+                //this piece of code is used just because of the special start nodes and goal nodes added to the RAIN Navigation graph when a new search is performed.
+                //Since these special goals were not in the original navigation graph, they will not be stored in the NodeRecordArray and we will have to add them
+                //to a special structure
+                //it's ok if you don't understand this, this is a hack and not part of the NodeArrayA* algorithm, just do NOT CHANGE THIS, or your algorithm will not work
+                childNodeRecord = new NodeRecord
+                {
+                    node = childNode,
+                    parent = parent,
+                    status = NodeStatus.Unvisited
+                };
+                this.NodeRecordArray.AddSpecialCaseNode(childNodeRecord);
+            }
+
+
+            var open = Open.SearchInOpen(childNodeRecord);
+            var close = Closed.SearchInClosed(childNodeRecord);
+            if (open == null && close == null)
+            {
+                Open.AddToOpen(childNodeRecord);
+            }
+            else if (open != null)
+            {
+                var g = parent.gValue + (childNode.LocalPosition - parent.node.LocalPosition).magnitude;
+
+                if (g < childNodeRecord.gValue)
+                {
+                    childNodeRecord.gValue = g;
+                    Open.Replace(childNodeRecord, childNodeRecord);
+                }
+            }
+            
+
         }
 
         private List<NavigationGraphNode> GetNodesHack(NavMeshPathGraph graph)

@@ -27,7 +27,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         protected override void ProcessChildNode(NodeRecord parentNode, NavigationGraphEdge connectionEdge, int edgeIndex)
         {
-			//TODO: Implement this method for the GoalBoundingPathfinding to Work. If you implemented the NodeArrayAStar properly, you wont need to change the search method.
+            //TODO: Implement this method for the GoalBoundingPathfinding to Work. 
+            // If you implemented the NodeArrayAStar properly, you wont need to change the search method.
 			
         }
     }

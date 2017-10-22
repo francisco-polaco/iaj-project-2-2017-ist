@@ -7,7 +7,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures
 {
     public class NodeRecordArray : IOpenSet, IClosedSet
     {
-        private NodeRecord[] NodeRecords { get; set; }
+        public NodeRecord[] NodeRecords { get; private set; }
         private List<NodeRecord> SpecialCaseNodes { get; set; } 
         private NodePriorityHeap Open { get; set; }
 
@@ -145,5 +145,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures
         {
             return Open.CountOpen();
         }
+
+
     }
 }
