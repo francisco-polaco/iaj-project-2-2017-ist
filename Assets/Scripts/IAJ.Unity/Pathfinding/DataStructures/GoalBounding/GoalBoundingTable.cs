@@ -19,7 +19,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
                 path = path.Replace(System.IO.Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
             }
 
-            string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath(path + "/" + typeof(GoalBoundingTable).Name.ToString() + ".asset");
+            string assetPathAndName = 
+                AssetDatabase.GenerateUniqueAssetPath(path + "/" + typeof(GoalBoundingTable).Name.ToString() + ".asset");
 
             AssetDatabase.CreateAsset(this, assetPathAndName);
             EditorUtility.SetDirty(this);
@@ -55,6 +56,33 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
             AssetDatabase.Refresh();
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = this;
+            
+        }
+
+        public void Load()
+        {
+            string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+            if (path == "")
+            {
+                path = "Assets";
+            }
+            else if (System.IO.Path.GetExtension(path) != "")
+            {
+                path = path.Replace(System.IO.Path.GetFileName(AssetDatabase.GetAssetPath(Selection.activeObject)), "");
+            }
+
+            string assetPathAndName = 
+                AssetDatabase.GenerateUniqueAssetPath(path + "/" + typeof(GoalBoundingTable).Name.ToString() + ".asset");
+            NodeGoalBounds ngb =
+                (NodeGoalBounds) AssetDatabase.LoadAssetAtPath(assetPathAndName, typeof(NodeGoalBounds));
+            //var a = Resources.LoadAll(assetPathAndName, typeof(NodeGoalBounds));
+            //foreach (var nodeGoalBoundse in a)
+            //{
+            if (ngb != null)
+            {
+                Debug.Log(ngb);
+            }
+            //}
         }
     }
 }

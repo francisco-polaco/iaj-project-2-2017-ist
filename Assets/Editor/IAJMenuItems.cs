@@ -32,7 +32,7 @@ public class IAJMenuItems
         NodeGoalBounds auxGoalBounds;
 
         //calculate goal bounds for each edge
-        for (int i=0; i < nodes.Count; i++)
+        for (int i=0; i < 1; i++)
         {
             if(nodes[i] is NavMeshEdge)
             {

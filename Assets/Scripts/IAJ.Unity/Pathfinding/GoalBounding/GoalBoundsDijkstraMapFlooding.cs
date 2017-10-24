@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures;
+﻿using System;
+using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures;
 using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding;
 using RAIN.Navigation.Graph;
 using RAIN.Navigation.NavMesh;
@@ -31,6 +32,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             this.NodeRecordArray = new NodeRecordArray(nodes);
             this.Open = this.NodeRecordArray;
             this.Closed = this.NodeRecordArray;
+
+            NodeGoalBounds = new NodeGoalBounds();
         }
 
         public void Search(NavigationGraphNode startNode, NodeGoalBounds nodeGoalBounds)
@@ -44,14 +47,32 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             var startNodeRecord = this.NodeRecordArray.GetNodeRecord(startNode);
             startNodeRecord.gValue = 0;
 
+            if (Open.GetBestAndRemove().Equals(startNodeRecord))
+            {
+                Closed.AddToClosed(startNodeRecord);
+                var outConnections = startNodeRecord.node.OutEdgeCount;
+                NodeGoalBounds.connectionBounds = new Bounds[outConnections];
+                for (int i = 0; i < outConnections; i++)
+                {
+                    ProcessChildNode(startNodeRecord, startNodeRecord.node.EdgeOut(i), i);
+
+                    NavigationGraphNode childNode = startNodeRecord.node.EdgeOut(i).ToNode;
+                    var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
+                    NodeGoalBounds.connectionBounds[i] = new Bounds(childNodeRecord.node.LocalPosition);
+                }
+            }
+            else { throw new Exception();}
+
             while (Open.CountOpen() > 0)
             {
                 var bestNode = Open.GetBestAndRemove();
                 Closed.AddToClosed(bestNode);
+                NodeGoalBounds.connectionBounds[bestNode.StartNodeOutConnectionIndex]
+                    .UpdateBounds(bestNode.node.LocalPosition);
                 var outConnections = bestNode.node.OutEdgeCount;
                 for (int i = 0; i < outConnections; i++)
                 {
-                    ProcessChildNode(bestNode, bestNode.node.EdgeOut(i), i);
+                    ProcessChildNode(bestNode, bestNode.node.EdgeOut(i), bestNode.StartNodeOutConnectionIndex);
                 }
 
             }
@@ -80,11 +101,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 this.NodeRecordArray.AddSpecialCaseNode(childNodeRecord);
             }
 
-
             var open = Open.SearchInOpen(childNodeRecord);
             var close = Closed.SearchInClosed(childNodeRecord);
             if (open == null && close == null)
             {
+                childNodeRecord.StartNodeOutConnectionIndex = connectionIndex;
                 Open.AddToOpen(childNodeRecord);
             }
             else if (open != null)
@@ -93,6 +114,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
                 if (g < childNodeRecord.gValue)
                 {
+                    childNodeRecord.StartNodeOutConnectionIndex = connectionIndex;
                     childNodeRecord.gValue = g;
                     Open.Replace(childNodeRecord, childNodeRecord);
                 }

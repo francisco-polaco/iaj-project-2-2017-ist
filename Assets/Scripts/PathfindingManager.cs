@@ -7,6 +7,7 @@ using RAIN.Navigation.NavMesh;
 using RAIN.Navigation.Graph;
 using UnityEditor;
 using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures;
+using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding;
 
 public class PathfindingManager : MonoBehaviour {
     private const int NodesPerFrame = 5;
@@ -57,6 +58,9 @@ public class PathfindingManager : MonoBehaviour {
         //this.Initialize(NavigationManager.Instance.NavMeshGraphs[0],
         //       new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0],
         //           new EuclidianHeuristic()));
+
+	    //GoalBoundingTable.CreateInstance<GoalBoundingTable>().Load();
+       
     }
 
     // Update is called once per frame
