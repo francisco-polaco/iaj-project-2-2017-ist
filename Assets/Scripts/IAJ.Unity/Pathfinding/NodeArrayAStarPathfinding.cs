@@ -17,6 +17,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             this.Open = this.NodeRecordArray;
             this.Closed = this.NodeRecordArray;
         }
+        public override string AlgorithmName {
+            get {
+                return "NodeArrayAStarPathFinding";
+            }
+        }
 
         protected override void ProcessChildNode(NodeRecord bestNode, NavigationGraphEdge connectionEdge, int edgeIndex)
         {

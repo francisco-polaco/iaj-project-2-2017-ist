@@ -8,6 +8,7 @@ using RAIN.Navigation.Graph;
 using UnityEditor;
 using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures;
 using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding;
+using Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding;
 
 public class PathfindingManager : MonoBehaviour {
     private const int NodesPerFrame = 5;
@@ -24,7 +25,7 @@ public class PathfindingManager : MonoBehaviour {
     public GameObject p6;
 
     private KeyCode drawNavMeshKey = KeyCode.M;
-    private bool drawNavMesh = true;
+    private bool drawNavMesh = false;
 
     //private fields for internal use only
     private Vector3 startPosition;
@@ -40,10 +41,15 @@ public class PathfindingManager : MonoBehaviour {
 
     private AStarPathfinding aStarPathfinding;
     private NodeArrayAStarPathFinding nodeArrayPathFinding;
+    private GoalBoundingPathfinding goalBoundingPathfinding; 
+    private readonly KeyCode NormalAStarKeyStart = KeyCode.A;
     private readonly KeyCode NodeArrayKeyStart = KeyCode.N;
+    private readonly KeyCode GoalBoundKeyStart = KeyCode.G;
+    private GUIStyle guiStyle = new GUIStyle(); //to change font size
 
     public void Initialize(NavMeshPathGraph navMeshGraph, AStarPathfinding pathfindingAlgorithm)
     {
+        guiStyle.fontSize = 20;
         this.draw = true;
         this.navMesh = navMeshGraph;
 
@@ -58,7 +64,9 @@ public class PathfindingManager : MonoBehaviour {
 
         aStarPathfinding = new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
         nodeArrayPathFinding = new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic());
-        //PathFinding = aStarPathfinding;
+        //TODO FIXME XXX null v
+        goalBoundingPathfinding = new GoalBoundingPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic(), null);
+        //TODO FIXME XXX null ^
         this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], aStarPathfinding);
     }
 
@@ -101,37 +109,63 @@ public class PathfindingManager : MonoBehaviour {
 		}
         else if(Input.GetKeyDown(KeyCode.Alpha1))
         {
-            this.InitializePathFinding(this.p5.transform.localPosition, this.p6.transform.localPosition);
+            this.startPosition = this.p5.transform.localPosition;
+            this.endPosition   = this.p6.transform.localPosition;
+            this.InitializePathFinding(this.startPosition, endPosition);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            this.InitializePathFinding(this.p1.transform.localPosition, this.p2.transform.localPosition);
+           this.startPosition = this.p1.transform.localPosition;
+            this.endPosition = this.p2.transform.localPosition;
+            this.InitializePathFinding(this.startPosition, endPosition);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            this.InitializePathFinding(this.p2.transform.localPosition, this.p4.transform.localPosition);
+            this.startPosition = this.p2.transform.localPosition;
+            this.endPosition = this.p4.transform.localPosition;
+            this.InitializePathFinding(this.startPosition, endPosition);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            this.InitializePathFinding(this.p2.transform.localPosition, this.p5.transform.localPosition);
+            this.startPosition = this.p2.transform.localPosition;
+            this.endPosition = this.p5.transform.localPosition;
+            this.InitializePathFinding(this.startPosition, endPosition);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha5))
         {
+            this.startPosition = this.p1.transform.localPosition;
+            this.endPosition = this.p3.transform.localPosition;
             this.InitializePathFinding(this.p1.transform.localPosition, this.p3.transform.localPosition);
         }
 		else if (Input.GetKeyDown(KeyCode.Alpha6))
 		{
-		    this.InitializePathFinding(this.p3.transform.localPosition, this.p4.transform.localPosition);
+            this.startPosition = this.p3.transform.localPosition;
+            this.endPosition = this.p4.transform.localPosition;
+            this.InitializePathFinding(this.startPosition, endPosition);
 		}
 		else if (Input.GetKeyDown(drawNavMeshKey)) {
             this.drawNavMesh = !this.drawNavMesh;
+            this.InitializePathFinding(this.startPosition, endPosition);
+
         }
 
-        if(Input.GetKeyDown(NodeArrayKeyStart)) {
+        if (Input.GetKeyDown(NodeArrayKeyStart)) {
             this.PathFinding = nodeArrayPathFinding;
+            this.InitializePathFinding(this.startPosition, endPosition);
+
+        }
+        if (Input.GetKeyDown(GoalBoundKeyStart)) {
+            this.PathFinding = goalBoundingPathfinding;
+            this.InitializePathFinding(this.startPosition, endPosition);
+
+        }
+        if (Input.GetKeyDown(NormalAStarKeyStart)) {
+            this.PathFinding = aStarPathfinding;
+            this.InitializePathFinding(this.startPosition, endPosition);
+
         }
 
-            
+
         //call the pathfinding method if the user specified a new goal
         if (this.PathFinding.InProgress)
 	    {
@@ -141,6 +175,27 @@ public class PathfindingManager : MonoBehaviour {
 
     public void OnGUI()
     {
+
+        var activePathFinding = PathFinding.AlgorithmName;
+
+        guiStyle.normal.textColor = Color.blue;
+        guiStyle.fontSize = 30;
+        GUI.Label(new Rect(10, 10, 300, 20), activePathFinding, guiStyle);
+
+
+        var alwaysOnText =      "Normal A* -> " + NormalAStarKeyStart.ToString()
+                            + "\nNodeArray -> " + NodeArrayKeyStart.ToString()
+                            + "\nGoalBound -> " + GoalBoundKeyStart.ToString()
+                            + "\n\nUsage: "
+                            + "\n  1st Select Algorithm"
+                            + "\n  2nd Choose The points (1 - 6 alpha numbers OR click)"
+                            + "\n\n\nDraw All Nodes -> " + drawNavMeshKey.ToString()
+                            ;
+        guiStyle.normal.textColor = Color.black;
+        guiStyle.fontSize = 20;
+        GUI.Label(new Rect(10, 40, 300, 250), alwaysOnText,guiStyle);
+
+
         if (this.currentSolution != null)
         {
             var time = this.PathFinding.TotalProcessingTime*1000;
@@ -153,14 +208,17 @@ public class PathfindingManager : MonoBehaviour {
             {
                 timePerNode = 0;
             }
-            var text = "Nodes Visited: " + this.PathFinding.TotalExploredNodes
+            var text = "NodesPerFrame: " + NodesPerFrame
+                       + "\nNodes Visited: " + this.PathFinding.TotalExploredNodes
                        + "\nMaximum Open Size: " + this.PathFinding.MaxOpenNodes
                        + "\nProcessing time (ms): " + time.ToString("F")
-                       + "\nReal Processing time (ms): " + (PathFinding.PureTotalTime*1000).ToString("F")
-                       + "\nTime per Node (ms):" + timePerNode.ToString("F4");
+                       + "\nReal Processing time (ms): " + (PathFinding.PureTotalTime * 1000).ToString("F")
+                       + "\nTime per Node (ms):" + timePerNode.ToString("F4")
+                       ;
 
-            GUI.contentColor = Color.black;
-            GUI.Label(new Rect(10,10,300,200),text);
+            guiStyle.normal.textColor = Color.black;
+            guiStyle.fontSize = 20;
+            GUI.Label(new Rect(10,280,300,200),text, guiStyle);
         }
     }
 

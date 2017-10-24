@@ -19,6 +19,13 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         private List<int> importantNodeGoalBoundsIndexes = new List<int>();
 
+        public override string AlgorithmName {
+            get {
+                return "GoalBoundingPathfinding";
+            }
+        }
+
+
         public GoalBoundingPathfinding(NavMeshPathGraph graph, IHeuristic heuristic, GoalBoundingTable goalBoundsTable) : base(graph, heuristic)
         {
             this.GoalBoundingTable = goalBoundsTable;

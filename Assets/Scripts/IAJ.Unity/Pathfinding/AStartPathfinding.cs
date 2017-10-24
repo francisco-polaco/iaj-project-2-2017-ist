@@ -27,6 +27,13 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
         public Vector3 StartPosition { get; protected set; }
         public Vector3 GoalPosition { get; protected set; }
 
+
+        public virtual string AlgorithmName {
+            get {
+                return "AStarPathfinding";
+            }
+        }
+
         //heuristic function
         public IHeuristic Heuristic { get; protected set; }
 
