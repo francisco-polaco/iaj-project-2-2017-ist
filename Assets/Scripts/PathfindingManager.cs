@@ -40,7 +40,7 @@ public class PathfindingManager : MonoBehaviour {
 
     private AStarPathfinding aStarPathfinding;
     private NodeArrayAStarPathFinding nodeArrayPathFinding;
-    private readonly string NodeArrayKeyStart;
+    private readonly KeyCode NodeArrayKeyStart = KeyCode.N;
 
     public void Initialize(NavMeshPathGraph navMeshGraph, AStarPathfinding pathfindingAlgorithm)
     {
@@ -58,7 +58,7 @@ public class PathfindingManager : MonoBehaviour {
 
         aStarPathfinding = new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
         nodeArrayPathFinding = new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic());
-
+        //PathFinding = aStarPathfinding;
         this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], aStarPathfinding);
     }
 
