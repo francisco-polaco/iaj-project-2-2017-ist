@@ -24,7 +24,7 @@ public class PathfindingManager : MonoBehaviour {
     public GameObject p6;
 
     private KeyCode drawNavMeshKey = KeyCode.M;
-    private bool drawNavMesh = false;
+    private bool drawNavMesh = true;
 
     //private fields for internal use only
     private Vector3 startPosition;
@@ -33,34 +33,33 @@ public class PathfindingManager : MonoBehaviour {
     private int currentClickNumber;
     
     private GlobalPath currentSolution;
-    private bool draw;
+    private bool draw = true;
 
     //public properties
-    public AStarPathfinding AStarPathFinding { get; private set; }
+    public AStarPathfinding PathFinding { get; private set; }
+
+    private AStarPathfinding aStarPathfinding;
+    private NodeArrayAStarPathFinding nodeArrayPathFinding;
+    private readonly string NodeArrayKeyStart;
 
     public void Initialize(NavMeshPathGraph navMeshGraph, AStarPathfinding pathfindingAlgorithm)
     {
         this.draw = true;
         this.navMesh = navMeshGraph;
 
-        this.AStarPathFinding = pathfindingAlgorithm;
-        this.AStarPathFinding.NodesPerFrame = NodesPerFrame;
+        this.PathFinding = pathfindingAlgorithm;
+        this.PathFinding.NodesPerFrame = NodesPerFrame;
     }
 
 	// Use this for initialization
 	void Awake ()
 	{
         this.currentClickNumber = 1;
-        // TODO AMARAL: With a pressing with a key choose the structure to profile 
-        this.Initialize(NavigationManager.Instance.NavMeshGraphs[0],
-        new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0],
-        new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic()));
-        //this.Initialize(NavigationManager.Instance.NavMeshGraphs[0],
-        //       new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0],
-        //           new EuclidianHeuristic()));
 
-	    //GoalBoundingTable.CreateInstance<GoalBoundingTable>().Load();
-       
+        aStarPathfinding = new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
+        nodeArrayPathFinding = new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic());
+
+        this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], aStarPathfinding);
     }
 
     // Update is called once per frame
@@ -96,7 +95,7 @@ public class PathfindingManager : MonoBehaviour {
                     this.endPosition = position;
                     this.draw = true;
                     //initialize the search algorithm
-                    this.AStarPathFinding.InitializePathfindingSearch(this.startPosition, this.endPosition);
+                    this.PathFinding.InitializePathfindingSearch(this.startPosition, this.endPosition);
                 }
 			}
 		}
@@ -128,11 +127,15 @@ public class PathfindingManager : MonoBehaviour {
             this.drawNavMesh = !this.drawNavMesh;
         }
 
+        if(Input.GetKeyDown(NodeArrayKeyStart)) {
+            this.PathFinding = nodeArrayPathFinding;
+        }
+
             
         //call the pathfinding method if the user specified a new goal
-        if (this.AStarPathFinding.InProgress)
+        if (this.PathFinding.InProgress)
 	    {
-	        var finished = this.AStarPathFinding.Search(out this.currentSolution, true);
+	        var finished = this.PathFinding.Search(out this.currentSolution, true);
 	    }
 	}
 
@@ -140,20 +143,20 @@ public class PathfindingManager : MonoBehaviour {
     {
         if (this.currentSolution != null)
         {
-            var time = this.AStarPathFinding.TotalProcessingTime*1000;
+            var time = this.PathFinding.TotalProcessingTime*1000;
             float timePerNode;
-            if (this.AStarPathFinding.TotalExploredNodes > 0)
+            if (this.PathFinding.TotalExploredNodes > 0)
             {
-                timePerNode = time/this.AStarPathFinding.TotalExploredNodes;
+                timePerNode = time/this.PathFinding.TotalExploredNodes;
             }
             else
             {
                 timePerNode = 0;
             }
-            var text = "Nodes Visited: " + this.AStarPathFinding.TotalExploredNodes
-                       + "\nMaximum Open Size: " + this.AStarPathFinding.MaxOpenNodes
+            var text = "Nodes Visited: " + this.PathFinding.TotalExploredNodes
+                       + "\nMaximum Open Size: " + this.PathFinding.MaxOpenNodes
                        + "\nProcessing time (ms): " + time.ToString("F")
-                       + "\nReal Processing time (ms): " + (AStarPathFinding.PureTotalTime*1000).ToString("F")
+                       + "\nReal Processing time (ms): " + (PathFinding.PureTotalTime*1000).ToString("F")
                        + "\nTime per Node (ms):" + timePerNode.ToString("F4");
 
             GUI.contentColor = Color.black;
@@ -164,7 +167,7 @@ public class PathfindingManager : MonoBehaviour {
     public void OnDrawGizmos()
     {
         if(this.drawNavMesh) {
-            var navMesh = this.AStarPathFinding.NavMeshGraph;
+            var navMesh = this.PathFinding.NavMeshGraph;
             Gizmos.color = Color.cyan;
             for (int index = 0; index < navMesh.Size; index++) {
                 var node = navMesh.GetNode(index);
@@ -185,13 +188,13 @@ public class PathfindingManager : MonoBehaviour {
             }
 
             //draw the nodes in Open and Closed Sets
-            if (this.AStarPathFinding != null)
+            if (this.PathFinding != null)
             {
                 Gizmos.color = Color.magenta;
 
-                if (this.AStarPathFinding.Open != null)
+                if (this.PathFinding.Open != null)
                 {
-                    foreach (var nodeRecord in this.AStarPathFinding.Open.All())
+                    foreach (var nodeRecord in this.PathFinding.Open.All())
                     {
                         Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.0f);
                     }
@@ -199,9 +202,9 @@ public class PathfindingManager : MonoBehaviour {
 
                 Gizmos.color = Color.blue;
 
-                if (this.AStarPathFinding.Closed != null)
+                if (this.PathFinding.Closed != null)
                 {
-                    foreach (var nodeRecord in this.AStarPathFinding.Closed.All())
+                    foreach (var nodeRecord in this.PathFinding.Closed.All())
                     {
                         Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 0.5f);
                     }
@@ -244,6 +247,6 @@ public class PathfindingManager : MonoBehaviour {
         this.currentSolution = null;
         this.draw = true;
 
-        this.AStarPathFinding.InitializePathfindingSearch(this.startPosition, this.endPosition);
+        this.PathFinding.InitializePathfindingSearch(this.startPosition, this.endPosition);
     }
 }
