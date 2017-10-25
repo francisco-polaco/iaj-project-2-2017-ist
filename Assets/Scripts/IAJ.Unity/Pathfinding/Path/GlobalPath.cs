@@ -11,6 +11,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.Path
         public List<NavigationGraphNode> PathNodes { get; protected set; }
         public List<Vector3> PathPositions { get; protected set; } 
         public bool IsPartial { get; set; }
+        public bool Smoothed { get; set; }
         public float Length { get; set; }
         public List<LocalPath> LocalPaths { get; protected set; } 
 
@@ -20,6 +21,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.Path
             this.PathNodes = new List<NavigationGraphNode>();
             this.PathPositions = new List<Vector3>();
             this.LocalPaths = new List<LocalPath>();
+            this.Smoothed = false;
         }
 
         

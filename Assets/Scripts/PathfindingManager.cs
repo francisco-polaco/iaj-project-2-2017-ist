@@ -145,8 +145,6 @@ public class PathfindingManager : MonoBehaviour {
 		}
 		else if (Input.GetKeyDown(drawNavMeshKey)) {
             this.drawNavMesh = !this.drawNavMesh;
-            this.InitializePathFinding(this.startPosition, endPosition);
-
         }
 
         if (Input.GetKeyDown(NodeArrayKeyStart)) {
@@ -170,6 +168,11 @@ public class PathfindingManager : MonoBehaviour {
         if (this.PathFinding.InProgress)
 	    {
 	        var finished = this.PathFinding.Search(out this.currentSolution, true);
+            if(finished) {
+                //Smooth it
+                //TODO
+                currentSolution.Smoothed = true;
+            }
 	    }
 	}
 
@@ -229,7 +232,7 @@ public class PathfindingManager : MonoBehaviour {
             Gizmos.color = Color.cyan;
             for (int index = 0; index < navMesh.Size; index++) {
                 var node = navMesh.GetNode(index);
-                Gizmos.DrawSphere(node.LocalPosition, 0.5f);
+                Gizmos.DrawSphere(node.LocalPosition, 0.4f);
             }
         }
         if (this.draw)
@@ -237,10 +240,11 @@ public class PathfindingManager : MonoBehaviour {
             //draw the current Solution Path if any (for debug purposes)
             if (this.currentSolution != null)
             {
+                Color colorLine = (this.currentSolution.Smoothed ? Color.green : Color.red);
                 var previousPosition = this.startPosition;
                 foreach (var pathPosition in this.currentSolution.PathPositions)
                 {
-                    Debug.DrawLine(previousPosition, pathPosition, Color.red);
+                    Debug.DrawLine(previousPosition, pathPosition, colorLine);
                     previousPosition = pathPosition;
                 }
             }
@@ -264,7 +268,7 @@ public class PathfindingManager : MonoBehaviour {
                 {
                     foreach (var nodeRecord in this.PathFinding.Closed.All())
                     {
-                        Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 0.5f);
+                        Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 1f);
                     }
                 }
             }
