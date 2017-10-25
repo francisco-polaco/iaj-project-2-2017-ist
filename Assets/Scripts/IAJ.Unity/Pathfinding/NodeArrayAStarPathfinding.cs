@@ -16,6 +16,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             this.NodeRecordArray = new NodeRecordArray(nodes);
             this.Open = this.NodeRecordArray;
             this.Closed = this.NodeRecordArray;
+            this.NodesPerFrame = 5;
         }
         public override string AlgorithmName {
             get {
@@ -69,7 +70,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             }
         }
 
-        private void UpdateNode(NodeRecord bestNode, NodeRecord childNode, float g, float h, float f)
+        protected void UpdateNode(NodeRecord bestNode, NodeRecord childNode, float g, float h, float f)
         {
             childNode.gValue = g;
             childNode.hValue = h;

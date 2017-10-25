@@ -173,29 +173,46 @@ namespace Assets.Scripts
                 var StartNode = NavigationManager.Instance.NavMeshGraphs[0].QuantizeToNode(this.startPosition, 1.0f);
                 //if it is not possible to quantize the positions and find the corresponding nodes, then we cannot proceed
                 if (StartNode == null) return;
-
-                //I need to do this because in Recast NavMesh graph, the edges of polygons are considered to be nodes and not the connections.
-                //Theoretically the Quantize method should then return the appropriate edge, but instead it returns a polygon
-                //Therefore, we need to create one explicit connection between the polygon and each edge of the corresponding polygon for the search algorithm to work
-                //((NavMeshPoly)StartNode).AddConnectedPoly(this.startPosition);
-
-                //var startNode = ((NavMeshPoly)this.StartNode).AddConnectedPoly(this.StartPosition);
+                
                 var a = new NodeGoalBounds();
+                var outConnectionsStart = StartNode.OutEdgeCount;
+                a.connectionBounds = new Bounds[outConnectionsStart];
+                for (int i = 0; i < a.connectionBounds.Length; i++)
+                {
+                    a.connectionBounds[i] = new Bounds();
+                }
                 alg.Search(StartNode, a);
 
                 this.boundito = a.connectionBounds;
-                foreach (var plsWork in boundito)
-                {
-                    var ola = plsWork;
-                }
+                
 
                 Debug.Log(a.connectionBounds.Length);
-                //foreach (var bound in a.connectionBounds)
-                //{
-                //   Debug.DrawLine();
-                //}
+                
             }
-            
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                draw = true;
+                var alg = new GoalBoundsDijkstraMapFlooding(NavigationManager.Instance.NavMeshGraphs[0]);
+                var StartNode = NavigationManager.Instance.NavMeshGraphs[0].QuantizeToNode(this.endPosition, 1.0f);
+                //if it is not possible to quantize the positions and find the corresponding nodes, then we cannot proceed
+                if (StartNode == null) return;
+
+                var a = new NodeGoalBounds();
+                var outConnectionsStart = StartNode.OutEdgeCount;
+                a.connectionBounds = new Bounds[outConnectionsStart];
+                for (int i = 0; i < a.connectionBounds.Length; i++)
+                {
+                    a.connectionBounds[i] = new Bounds();
+                }
+                alg.Search(StartNode, a);
+
+                this.boundito = a.connectionBounds;
+
+
+                Debug.Log(a.connectionBounds.Length);
+
+            }
+
 
 
             //call the pathfinding method if the user specified a new goal
@@ -263,16 +280,35 @@ namespace Assets.Scripts
         {
             if (this.boundito != null)
             {
+                var nrOfPoints = 0;
+                var index = 0;
+                var colorrrr = Color.black;
                 foreach (var bound in boundito)
                 {
-                    Color[] c = new Color[] {Color.blue, Color.green, Color.red, Color.magenta, Color.yellow};
-                    System.Random r = new System.Random();
-                    int index = r.Next() % c.Length;
-                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.minx, 0, bound.maxz), Color.red);
-                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.maxx, 0, bound.minz), Color.red);
-                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.maxz), Color.red);
-                    Debug.DrawLine(new Vector3(bound.maxx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.minz), Color.red);
+                    if (bound.minx == bound.maxx && bound.minz == bound.maxz)
+                    {
+                        nrOfPoints++;
+                        Gizmos.color = Color.cyan;
+                        Gizmos.DrawSphere(new Vector3(bound.minx,0,bound.minz), 5);
+                    }
+                    Color[] c = new Color[] {Color.blue, Color.green, Color.red, Color.magenta, Color.yellow, Color.gray, Color.cyan};
+                    if (index >= c.Length)
+                    {
+                        colorrrr = Color.black;
+                    }
+                    else
+                    {
+                        colorrrr = c[index];
+
+                    }
+
+                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.minx, 0, bound.maxz), colorrrr);
+                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
+                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.maxz), colorrrr);
+                    Debug.DrawLine(new Vector3(bound.maxx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
+                    index++;
                 }
+                //Debug.Log(nrOfPoints);
             
             }
             if (this.drawNavMesh) {

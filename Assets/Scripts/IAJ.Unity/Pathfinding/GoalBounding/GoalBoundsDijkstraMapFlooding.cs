@@ -52,23 +52,22 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
             var startNodeRecord = this.NodeRecordArray.GetNodeRecord(startNode);
             startNodeRecord.gValue = 0;
-            Open.AddToOpen(startNodeRecord);
-            if (Open.GetBestAndRemove().Equals(startNodeRecord))
-            {
-                Closed.AddToClosed(startNodeRecord);
-                var outConnections = startNodeRecord.node.OutEdgeCount;
-                nodeGoalBounds.connectionBounds = new Bounds[outConnections];
-                UnityEngine.Debug.Log("xDzinho" + outConnections);
-                for (int i = 0; i < outConnections; i++)
-                {
-                    ProcessChildNode(startNodeRecord, startNodeRecord.node.EdgeOut(i), i);
 
-                    NavigationGraphNode childNode = startNodeRecord.node.EdgeOut(i).ToNode;
-                    var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
-                    nodeGoalBounds.connectionBounds[i] = new Bounds(childNodeRecord.node.LocalPosition);
-                }
+            Open.AddToOpen(startNodeRecord);
+            
+            Closed.AddToClosed(startNodeRecord);
+            var outConnectionsStart = startNodeRecord.node.OutEdgeCount;
+            //nodeGoalBounds.connectionBounds = new Bounds[outConnectionsStart];
+            UnityEngine.Debug.Log("xDzinho" + outConnectionsStart);
+            for (int i = 0; i < outConnectionsStart; i++)
+            {
+                ProcessChildNode(startNodeRecord, startNodeRecord.node.EdgeOut(i), i);
+
+                NavigationGraphNode childNode = startNodeRecord.node.EdgeOut(i).ToNode;
+                var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
+                nodeGoalBounds.connectionBounds[i].UpdateBounds(childNodeRecord.node.LocalPosition);
             }
-            else { throw new Exception();}
+            
 
             while (Open.CountOpen() > 0)
             {
@@ -83,9 +82,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 }
 
             }
-            //TODO: Implement the algorithm that calculates the goal bounds using a dijkstra
-            // Given that the nodes in the graph correspond to the edges of a polygon, 
-            // we won't be able to use the vertices of the polygon to update the bounding boxes
         }
 
        
@@ -93,26 +89,15 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
         {
             NavigationGraphNode childNode = connectionEdge.ToNode;
             var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
-            if (childNodeRecord == null)
-            {
-                //this piece of code is used just because of the special start nodes and goal nodes added to the RAIN Navigation graph when a new search is performed.
-                //Since these special goals were not in the original navigation graph, they will not be stored in the NodeRecordArray and we will have to add them
-                //to a special structure
-                //it's ok if you don't understand this, this is a hack and not part of the NodeArrayA* algorithm, just do NOT CHANGE THIS, or your algorithm will not work
-                childNodeRecord = new NodeRecord
-                {
-                    node = childNode,
-                    parent = parent,
-                    status = NodeStatus.Unvisited
-                };
-                this.NodeRecordArray.AddSpecialCaseNode(childNodeRecord);
-            }
+            
 
             var open = Open.SearchInOpen(childNodeRecord);
             var close = Closed.SearchInClosed(childNodeRecord);
             if (open == null && close == null)
             {
-                childNodeRecord.StartNodeOutConnectionIndex = connectionIndex;
+                float g = parent.gValue + (childNode.LocalPosition - parent.node.LocalPosition).magnitude;
+
+                UpdateNode(parent, childNodeRecord, g, 0, F(childNodeRecord),connectionIndex);
                 Open.AddToOpen(childNodeRecord);
             }
             else if (open != null)
@@ -121,15 +106,20 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
                 if (g < childNodeRecord.gValue)
                 {
-                    childNodeRecord.StartNodeOutConnectionIndex = connectionIndex;
-                    childNodeRecord.gValue = g;
+                    UpdateNode(parent, childNodeRecord, g, 0, F(childNodeRecord), connectionIndex);
                     Open.Replace(childNodeRecord, childNodeRecord);
                 }
             }
-            
-
         }
 
+        protected void UpdateNode(NodeRecord bestNode, NodeRecord childNode, float g, float h, float f, int index)
+        {
+            childNode.gValue = g;
+            childNode.hValue = h;
+            childNode.fValue = f;
+            childNode.parent = bestNode;
+            childNode.StartNodeOutConnectionIndex = index;
+        }
         private float F(NodeRecord node)
         {
             return node.gValue;
