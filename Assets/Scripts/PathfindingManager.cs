@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.IAJ.Unity.Pathfinding;
 using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures;
+using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding;
 using Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding;
 using Assets.Scripts.IAJ.Unity.Pathfinding.Heuristics;
 using Assets.Scripts.IAJ.Unity.Pathfinding.Path;
@@ -60,11 +61,13 @@ namespace Assets.Scripts
         void Awake ()
         {
             this.currentClickNumber = 1;
-            aStarPathfinding = new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
-            nodeArrayPathFinding = new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic());
-            //TODO FIXME XXX null v
-            goalBoundingPathfinding = new GoalBoundingPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic(), null);
-            //TODO FIXME XXX null ^
+            aStarPathfinding = 
+                new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
+            nodeArrayPathFinding = 
+                new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic());
+            var goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
+            goalBoundingPathfinding = 
+                new GoalBoundingPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic(), goalBoundTable);
             this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], aStarPathfinding);
         }
 

@@ -34,6 +34,9 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             this.Closed = this.NodeRecordArray;
 
             NodeGoalBounds = new NodeGoalBounds();
+
+            this.Open.Initialize();
+            this.Closed.Initialize();
         }
 
         public void Search(NavigationGraphNode startNode, NodeGoalBounds nodeGoalBounds)
@@ -44,9 +47,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 nodeRecords[i].gValue = float.MaxValue;
             }
 
+
+
             var startNodeRecord = this.NodeRecordArray.GetNodeRecord(startNode);
             startNodeRecord.gValue = 0;
-
+            Open.AddToOpen(startNodeRecord);
             if (Open.GetBestAndRemove().Equals(startNodeRecord))
             {
                 Closed.AddToClosed(startNodeRecord);
@@ -121,6 +126,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             }
             
 
+        }
+
+        private float F(NodeRecord node)
+        {
+            return node.gValue;
         }
 
         private List<NavigationGraphNode> GetNodesHack(NavMeshPathGraph graph)
