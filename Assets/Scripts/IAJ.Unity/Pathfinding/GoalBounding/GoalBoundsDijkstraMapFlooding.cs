@@ -4,6 +4,7 @@ using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding;
 using RAIN.Navigation.Graph;
 using RAIN.Navigation.NavMesh;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine.Assertions.Comparers;
 
 namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
@@ -18,7 +19,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
     {
         public NavMeshPathGraph NavMeshGraph { get; protected set; }
         public NavigationGraphNode StartNode { get; protected set; }
-        public NodeGoalBounds NodeGoalBounds { get; protected set; }
+       // public NodeGoalBounds NodeGoalBounds { get; protected set; }
         protected NodeRecordArray NodeRecordArray { get; set; }
 
         public IOpenSet Open { get; protected set; }
@@ -33,7 +34,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             this.Open = this.NodeRecordArray;
             this.Closed = this.NodeRecordArray;
 
-            NodeGoalBounds = new NodeGoalBounds();
+            //NodeGoalBounds = new NodeGoalBounds();
 
             this.Open.Initialize();
             this.Closed.Initialize();
@@ -56,14 +57,15 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             {
                 Closed.AddToClosed(startNodeRecord);
                 var outConnections = startNodeRecord.node.OutEdgeCount;
-                NodeGoalBounds.connectionBounds = new Bounds[outConnections];
+                nodeGoalBounds.connectionBounds = new Bounds[outConnections];
+                UnityEngine.Debug.Log("xDzinho" + outConnections);
                 for (int i = 0; i < outConnections; i++)
                 {
                     ProcessChildNode(startNodeRecord, startNodeRecord.node.EdgeOut(i), i);
 
                     NavigationGraphNode childNode = startNodeRecord.node.EdgeOut(i).ToNode;
                     var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
-                    NodeGoalBounds.connectionBounds[i] = new Bounds(childNodeRecord.node.LocalPosition);
+                    nodeGoalBounds.connectionBounds[i] = new Bounds(childNodeRecord.node.LocalPosition);
                 }
             }
             else { throw new Exception();}
@@ -72,7 +74,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             {
                 var bestNode = Open.GetBestAndRemove();
                 Closed.AddToClosed(bestNode);
-                NodeGoalBounds.connectionBounds[bestNode.StartNodeOutConnectionIndex]
+                nodeGoalBounds.connectionBounds[bestNode.StartNodeOutConnectionIndex]
                     .UpdateBounds(bestNode.node.LocalPosition);
                 var outConnections = bestNode.node.OutEdgeCount;
                 for (int i = 0; i < outConnections; i++)

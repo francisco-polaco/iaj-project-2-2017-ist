@@ -7,6 +7,7 @@ using Assets.Scripts.IAJ.Unity.Pathfinding.Path;
 using RAIN.Navigation;
 using RAIN.Navigation.NavMesh;
 using UnityEngine;
+using Bounds = Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding.Bounds;
 
 namespace Assets.Scripts
 {
@@ -46,6 +47,7 @@ namespace Assets.Scripts
         private readonly KeyCode NodeArrayKeyStart = KeyCode.N;
         private readonly KeyCode GoalBoundKeyStart = KeyCode.G;
         private GUIStyle guiStyle = new GUIStyle(); //to change font size
+        private Bounds[] boundito;
 
         public void Initialize(NavMeshPathGraph navMeshGraph, AStarPathfinding pathfindingAlgorithm)
         {
@@ -164,6 +166,37 @@ namespace Assets.Scripts
 
             }
 
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                draw = true;
+                var alg = new GoalBoundsDijkstraMapFlooding(NavigationManager.Instance.NavMeshGraphs[0]);
+                var StartNode = NavigationManager.Instance.NavMeshGraphs[0].QuantizeToNode(this.startPosition, 1.0f);
+                //if it is not possible to quantize the positions and find the corresponding nodes, then we cannot proceed
+                if (StartNode == null) return;
+
+                //I need to do this because in Recast NavMesh graph, the edges of polygons are considered to be nodes and not the connections.
+                //Theoretically the Quantize method should then return the appropriate edge, but instead it returns a polygon
+                //Therefore, we need to create one explicit connection between the polygon and each edge of the corresponding polygon for the search algorithm to work
+                //((NavMeshPoly)StartNode).AddConnectedPoly(this.startPosition);
+
+                //var startNode = ((NavMeshPoly)this.StartNode).AddConnectedPoly(this.StartPosition);
+                var a = new NodeGoalBounds();
+                alg.Search(StartNode, a);
+
+                this.boundito = a.connectionBounds;
+                foreach (var plsWork in boundito)
+                {
+                    var ola = plsWork;
+                }
+
+                Debug.Log(a.connectionBounds.Length);
+                //foreach (var bound in a.connectionBounds)
+                //{
+                //   Debug.DrawLine();
+                //}
+            }
+            
+
 
             //call the pathfinding method if the user specified a new goal
             if (this.PathFinding.InProgress)
@@ -228,7 +261,21 @@ namespace Assets.Scripts
 
         public void OnDrawGizmos()
         {
-            if(this.drawNavMesh) {
+            if (this.boundito != null)
+            {
+                foreach (var bound in boundito)
+                {
+                    Color[] c = new Color[] {Color.blue, Color.green, Color.red, Color.magenta, Color.yellow};
+                    System.Random r = new System.Random();
+                    int index = r.Next() % c.Length;
+                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.minx, 0, bound.maxz), Color.red);
+                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.maxx, 0, bound.minz), Color.red);
+                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.maxz), Color.red);
+                    Debug.DrawLine(new Vector3(bound.maxx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.minz), Color.red);
+                }
+            
+            }
+            if (this.drawNavMesh) {
                 var navMesh = this.PathFinding.NavMeshGraph;
                 Gizmos.color = Color.cyan;
                 for (int index = 0; index < navMesh.Size; index++) {
