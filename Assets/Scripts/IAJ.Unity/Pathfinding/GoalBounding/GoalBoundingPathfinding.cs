@@ -20,7 +20,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         private NodeGoalBounds startingNodeGoalBounds;
 
-        private GoalBoundsDijkstraMapFlooding digjstra;
+        public GoalBoundsDijkstraMapFlooding digjstra;
+        public NodeGoalBounds toPrintNodeGoulBounds;
 
 
         public override string AlgorithmName {
@@ -48,16 +49,16 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
         {
             //TODO: Implement this method for the GoalBoundingPathfinding to Work. 
             // If you implemented the NodeArrayAStar properly, you wont need to change the search method.
-            var childNode = connectionEdge.ToNode;
-            var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
+            //var childNode = connectionEdge.ToNode;
+            //var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
             TotalEdges++;
-            var table = GoalBoundingTable;
-            var xD = table.table;
-            var b = xD;
-            NodeGoalBounds pls = GoalBoundingTable.table[0] as NodeGoalBounds;
+            //var table = GoalBoundingTable;
+            //var xD = table.table;
+            //var b = xD;
+            //NodeGoalBounds pls = GoalBoundingTable.table[0] as NodeGoalBounds;
             //Debug.Log(parentNode.node.NodeIndex);
             //Debug.Log(pls);
-            var a = pls;
+            //var a = pls;
             
             NodeGoalBounds ngb  = (NodeGoalBounds) ScriptableObject.CreateInstance(typeof(NodeGoalBounds));
             var outConnectionsStart = parentNode.node.OutEdgeCount;
@@ -67,11 +68,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 ngb.connectionBounds[i] = (Bounds)ScriptableObject.CreateInstance(typeof(Bounds));
             }
             digjstra.Search(parentNode.node, ngb);
-
-            //Debug.Log("1-"+ngb.connectionBounds[edgeIndex].minx);
-            //Debug.Log("2-" + ngb.connectionBounds[edgeIndex].maxx);
-            //Debug.Log("3-" + ngb.connectionBounds[edgeIndex].maxz);
-            //Debug.Log("4-" + ngb.connectionBounds[edgeIndex].minz);
+            toPrintNodeGoulBounds = ngb;
+            Debug.Log(edgeIndex);
+            Debug.Log("x min:"+ngb.connectionBounds[edgeIndex].minx + " x max:" + ngb.connectionBounds[edgeIndex].maxx+ " z min:" + ngb.connectionBounds[edgeIndex].maxz + " z max:" + ngb.connectionBounds[edgeIndex].minz);
+            Debug.Log("GoalPosition: " + GoalPosition);
+            Debug.Log("Goal in Bound:" + ngb.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition));
             if (ngb.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition))
             {
                 base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);

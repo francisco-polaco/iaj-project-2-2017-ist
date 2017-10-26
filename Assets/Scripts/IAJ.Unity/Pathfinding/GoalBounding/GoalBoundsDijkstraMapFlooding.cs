@@ -17,10 +17,12 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
     //5) we don't need to do anything when a node is already in closed
     public class GoalBoundsDijkstraMapFlooding
     {
+        
+
         public NavMeshPathGraph NavMeshGraph { get; protected set; }
         public NavigationGraphNode StartNode { get; protected set; }
        // public NodeGoalBounds NodeGoalBounds { get; protected set; }
-        protected NodeRecordArray NodeRecordArray { get; set; }
+        public NodeRecordArray NodeRecordArray { get; protected set; }
 
         public IOpenSet Open { get; protected set; }
         public IClosedSet Closed { get; protected set; }
@@ -42,6 +44,9 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         public void Search(NavigationGraphNode startNode, NodeGoalBounds nodeGoalBounds)
         {
+            this.Open.Initialize();
+            this.Closed.Initialize();
+            StartNode = startNode;
             //UnityEngine.Debug.Log("Initial count: "+ Open.CountOpen());
             var startNodeRecord = this.NodeRecordArray.GetNodeRecord(startNode);
             startNodeRecord.gValue = 0;
@@ -53,7 +58,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
             var outConnectionsStart = startNodeRecord.node.OutEdgeCount;
             //nodeGoalBounds.connectionBounds = new Bounds[outConnectionsStart];
-            //UnityEngine.Debug.Log("xDzinho: " + outConnectionsStart);
+            UnityEngine.Debug.Log("xDzinho: " + outConnectionsStart);
             for (int i = 0; i < outConnectionsStart; i++)
             {
                 //UnityEngine.Debug.Log("i: " + i);
@@ -61,7 +66,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
                 NavigationGraphNode childNode = startNodeRecord.node.EdgeOut(i).ToNode;
                 var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
-                nodeGoalBounds.connectionBounds[i].UpdateBounds(childNodeRecord.node.LocalPosition);
+                nodeGoalBounds.connectionBounds[i].InitializeBounds(childNodeRecord.node.LocalPosition);
             }
             //UnityEngine.Debug.Log("Max connection Bounds: " + nodeGoalBounds.connectionBounds.Length);
             //UnityEngine.Debug.Log("Out Connections Start: " + outConnectionsStart);
@@ -80,9 +85,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 }
 
             }
-
-            this.Open.Initialize();
-            this.Closed.Initialize();
         }
 
        

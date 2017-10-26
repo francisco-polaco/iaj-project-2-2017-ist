@@ -131,6 +131,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             uint count = 0;
             while (Open.CountOpen() > 0)
             {
+                Debug.Log("Open countzzzzz: " + Open.CountOpen());
+
                 var bestNode = Open.GetBestAndRemove();
                 count++;
                 if (this.GoalNode.Equals(bestNode.node))
@@ -167,6 +169,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                     return false;
                 }
             }
+            Debug.Log("Open countxxxxxx: " + Open.CountOpen());
 
             UpdateInfo(initialFrameTime);
             InProgress = false;

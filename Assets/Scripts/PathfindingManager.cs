@@ -11,7 +11,7 @@ using Bounds = Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding.
 
 namespace Assets.Scripts {
     public class PathfindingManager : MonoBehaviour {
-        private const int NodesPerFrame = 5;
+        private const int NodesPerFrame = 1;
 
         //public fields to be set in Unity Editor
         public GameObject endDebugSphere;
@@ -32,8 +32,7 @@ namespace Assets.Scripts {
         private Vector3 endPosition;
         private NavMeshPathGraph navMesh;
         private int currentClickNumber;
-
-
+        private GoalBoundsDijkstraMapFlooding mapFloodingAlgorithm;
         private GlobalPath currentSolution;
         private GlobalPath smoothedSolution;
         private bool draw = true;
@@ -49,8 +48,10 @@ namespace Assets.Scripts {
         private readonly KeyCode NormalAStarKeyStart = KeyCode.A;
         private readonly KeyCode NodeArrayKeyStart = KeyCode.N;
         private readonly KeyCode GoalBoundKeyStart = KeyCode.G;
+        private readonly KeyCode ClearKey = KeyCode.C;
         private GUIStyle guiStyle = new GUIStyle(); //to change font size
         private Bounds[] boundito;
+        private Color[] c = new Color[] { Color.blue, Color.green, Color.red, Color.magenta, Color.yellow, Color.gray, Color.cyan };
 
 
         public void Initialize(NavMeshPathGraph navMeshGraph, AStarPathfinding pathfindingAlgorithm) {
@@ -65,6 +66,8 @@ namespace Assets.Scripts {
         // Use this for initialization
         void Awake() {
             this.currentClickNumber = 1;
+            mapFloodingAlgorithm = new GoalBoundsDijkstraMapFlooding(NavigationManager.Instance.NavMeshGraphs[0]);
+
             aStarPathfinding =
                 new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
             nodeArrayPathFinding =
@@ -144,12 +147,15 @@ namespace Assets.Scripts {
             } else if (Input.GetKeyDown(NormalAStarKeyStart)) {
                 this.PathFinding = aStarPathfinding;
                 this.InitializePathFinding(this.startPosition, endPosition);
+            } else if (Input.GetKeyDown(ClearKey)) {
+                this.currentSolution = null;
+                
             }
 
             //call the pathfinding method if the user specified a new goal
             if (this.PathFinding.InProgress) {
                 var finished = this.PathFinding.Search(out this.currentSolution, true);
-                if (finished) {
+                if (finished && currentSolution != null) {
                     currentSolution.PathPositions.Insert(0, startPosition);
                     solutionIndex = 0;
                     //Smooth it
@@ -162,7 +168,6 @@ namespace Assets.Scripts {
 
             if (Input.GetKeyDown(KeyCode.H)) {
                 draw = true;
-                var alg = new GoalBoundsDijkstraMapFlooding(NavigationManager.Instance.NavMeshGraphs[0]);
                 var StartNode = NavigationManager.Instance.NavMeshGraphs[0].QuantizeToNode(this.startPosition, 1.0f);
                 //if it is not possible to quantize the positions and find the corresponding nodes, then we cannot proceed
                 if (StartNode == null) return;
@@ -173,17 +178,13 @@ namespace Assets.Scripts {
                 for (int i = 0; i < a.connectionBounds.Length; i++) {
                     a.connectionBounds[i] = new Bounds();
                 }
-                alg.Search(StartNode, a);
-
+                mapFloodingAlgorithm.Search(StartNode, a);
                 this.boundito = a.connectionBounds;
-
-
                 Debug.Log(a.connectionBounds.Length);
 
             }
             if (Input.GetKeyDown(KeyCode.J)) {
                 draw = true;
-                var alg = new GoalBoundsDijkstraMapFlooding(NavigationManager.Instance.NavMeshGraphs[0]);
                 var StartNode = NavigationManager.Instance.NavMeshGraphs[0].QuantizeToNode(this.endPosition, 1.0f);
                 //if it is not possible to quantize the positions and find the corresponding nodes, then we cannot proceed
                 if (StartNode == null) return;
@@ -194,14 +195,11 @@ namespace Assets.Scripts {
                 for (int i = 0; i < a.connectionBounds.Length; i++) {
                     a.connectionBounds[i] = new Bounds();
                 }
-                alg.Search(StartNode, a);
+                mapFloodingAlgorithm.Search(StartNode, a);
 
                 this.boundito = a.connectionBounds;
-
                 Debug.Log(a.connectionBounds.Length);
-
             }
-
         }
 
 
@@ -257,32 +255,70 @@ namespace Assets.Scripts {
 
         public void OnDrawGizmos() {
             frameCount++;
+            var boundBoxAlgorithm = PathFinding as GoalBoundingPathfinding;
+            if(boundBoxAlgorithm != null) {
 
-            if (this.boundito != null) {
+                mapFloodingAlgorithm = boundBoxAlgorithm.digjstra;
+                if(boundBoxAlgorithm.toPrintNodeGoulBounds != null) {
+                    this.boundito = boundBoxAlgorithm.toPrintNodeGoulBounds.connectionBounds;
+                }
+
+            }
+
+            if (this.boundito != null && mapFloodingAlgorithm != null && mapFloodingAlgorithm.Closed != null) {
+                var colorrrr = Color.black;
+                foreach (var node in mapFloodingAlgorithm.Closed.All()) {
+                    var boundIndex = node.StartNodeOutConnectionIndex;
+                    if (boundIndex >= c.Length) {
+                        colorrrr = Color.black;
+                    } else {
+                        colorrrr = c[boundIndex];
+                    }
+                    Gizmos.color = colorrrr;
+                    Gizmos.DrawSphere(node.node.LocalPosition, 1f);
+                }
+                for (int i = 0; i < mapFloodingAlgorithm.StartNode.OutEdgeCount;i++) {
+                    var rainNode = mapFloodingAlgorithm.StartNode.EdgeOut(i).ToNode;
+
+                    var nodeToPrint = mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(rainNode);
+                    var boundIndex = nodeToPrint.StartNodeOutConnectionIndex;
+                    if (boundIndex >= c.Length) {
+                        colorrrr = Color.black;
+                    } else {
+                        colorrrr = c[boundIndex];
+                    }
+                    Gizmos.color = colorrrr;
+                    Gizmos.DrawSphere(nodeToPrint.node.LocalPosition, 0.5f);
+                }
+                Gizmos.color = Color.black;
+                Gizmos.DrawSphere(mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(mapFloodingAlgorithm.StartNode).node.LocalPosition, 0.5f);
+
+
                 var nrOfPoints = 0;
                 var index = 0;
-                var colorrrr = Color.black;
+                colorrrr = Color.black;
+                string boxes = "";
                 foreach (var bound in boundito) {
-                    if (bound.minx == bound.maxx && bound.minz == bound.maxz) {
-                        nrOfPoints++;
-                        Gizmos.color = Color.cyan;
-                        Gizmos.DrawSphere(new Vector3(bound.minx, 0, bound.minz), 5);
-                    }
-                    Color[] c = new Color[] { Color.blue, Color.green, Color.red, Color.magenta, Color.yellow, Color.gray, Color.cyan };
                     if (index >= c.Length) {
                         colorrrr = Color.black;
                     } else {
                         colorrrr = c[index];
-
                     }
-
-                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.minx, 0, bound.maxz), colorrrr);
-                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
-                    Debug.DrawLine(new Vector3(bound.minx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.maxz), colorrrr);
-                    Debug.DrawLine(new Vector3(bound.maxx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
+                    boxes += "\n" + index + " : " + bound.minx + " -> " + bound.maxx + " _z_ " + +bound.minz + " -> " + bound.maxz;
+                    if (bound.minx == bound.maxx && bound.minz == bound.maxz) {
+                        nrOfPoints++;
+                        Gizmos.color = Color.cyan;
+                        Gizmos.DrawSphere(new Vector3(bound.minx, 0, bound.minz), 0.5f);
+                    } else {
+                        Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.minx, 0, bound.maxz), colorrrr);
+                        Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
+                        Debug.DrawLine(new Vector3(bound.minx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.maxz), colorrrr);
+                        Debug.DrawLine(new Vector3(bound.maxx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
+                    }
                     index++;
                 }
-                //Debug.Log(nrOfPoints);
+                //Debug.Log(boxes);
+                //Debug.Log("nrOfPoints: " + nrOfPoints);
 
             }
             if (this.drawNavMesh) {
@@ -295,34 +331,35 @@ namespace Assets.Scripts {
             }
             if (this.draw) {
                 //draw the current Solution Path if any (for debug purposes)
-                if(this.currentSolution != null) {
+                if (this.currentSolution != null) {
                     var colorLine = Color.red;
                     var previousPosition = this.startPosition;
                     foreach (var pathPosition in this.currentSolution.PathPositions) {
                         Debug.DrawLine(previousPosition, pathPosition, colorLine);
                         previousPosition = pathPosition;
                     }
-                }
 
-                if (this.currentSolution.Smoothed) {
-                    GlobalPath pathToPrint = smoothedSolution;
-                    var colorLine = Color.yellow;
-                    if (frameCount % 10 == 0) {
-                        solutionIndex++;
-                        if (solutionIndex == pathToPrint.PathPositions.Count) {
-                            solutionIndex = 0;
+
+                    if (this.currentSolution.Smoothed) {
+                        GlobalPath pathToPrint = smoothedSolution;
+                        colorLine = Color.yellow;
+                        if (frameCount % 10 == 0) {
+                            solutionIndex++;
+                            if (solutionIndex == pathToPrint.PathPositions.Count) {
+                                solutionIndex = 0;
+                            }
                         }
-                    }
-                    Gizmos.DrawSphere(pathToPrint.PathPositions[solutionIndex], 10.0f);
+                        Gizmos.DrawSphere(pathToPrint.PathPositions[solutionIndex], 10.0f);
 
-                    var previousPosition = this.startPosition;
-                    foreach (var pathPosition in this.smoothedSolution.PathPositions) {
-                        Debug.DrawLine(previousPosition, pathPosition, colorLine);
-                        previousPosition = pathPosition;
+                        previousPosition = this.startPosition;
+                        foreach (var pathPosition in this.smoothedSolution.PathPositions) {
+                            Debug.DrawLine(previousPosition, pathPosition, colorLine);
+                            previousPosition = pathPosition;
+                        }
                     }
                 }
                 //draw the nodes in Open and Closed Sets
-                if (this.PathFinding != null) {
+                if (this.PathFinding != null && this.currentSolution != null) {
                     Gizmos.color = Color.magenta;
                     if (this.PathFinding.Open != null) {
                         foreach (var nodeRecord in this.PathFinding.Open.All()) {

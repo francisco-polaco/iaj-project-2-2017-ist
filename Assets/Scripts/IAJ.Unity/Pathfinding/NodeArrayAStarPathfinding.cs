@@ -67,6 +67,14 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                 UpdateNode(bestNode, childNodeRecord, g, h, f);
                 Closed.RemoveFromClosed(childNodeRecord);
                 Open.AddToOpen(childNodeRecord);
+            } else {
+                if(childNodeStatus == NodeStatus.Open) {
+                    UnityEngine.Debug.Log("Open AUTISMOOOO");
+                }
+                if (childNodeStatus == NodeStatus.Closed) {
+                    UnityEngine.Debug.Log("Close AUTISMOOOO");
+                }
+                UnityEngine.Debug.Log("Estou morto");
             }
         }
 
