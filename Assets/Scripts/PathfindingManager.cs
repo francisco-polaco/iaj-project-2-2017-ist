@@ -198,8 +198,6 @@ namespace Assets.Scripts {
 
                 this.boundito = a.connectionBounds;
 
-
-
                 Debug.Log(a.connectionBounds.Length);
 
             }
@@ -335,6 +333,16 @@ namespace Assets.Scripts {
 
                     if (this.PathFinding.Closed != null) {
                         foreach (var nodeRecord in this.PathFinding.Closed.All()) {
+                            Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 1f);
+                        }
+                    }
+
+                    Gizmos.color = Color.blue;
+
+                    if (this.PathFinding.Closed != null)
+                    {
+                        foreach (var nodeRecord in this.PathFinding.Closed.All())
+                        {
                             Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 1f);
                         }
                     }
