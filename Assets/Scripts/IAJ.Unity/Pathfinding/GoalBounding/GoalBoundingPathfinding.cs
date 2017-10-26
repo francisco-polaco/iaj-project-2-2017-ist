@@ -5,6 +5,9 @@ using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures;
 using RAIN.Navigation.Graph;
 using UnityEngine;
 using System.Collections.Generic;
+using Assets.Scripts.IAJ.Unity.Pathfinding.Path;
+using Bounds = Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding.Bounds;
+
 
 namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 {
@@ -12,10 +15,12 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
     {
         public GoalBoundingTable GoalBoundingTable { get; protected set;}
         
-        public int DiscardedEdges { get; protected set; }
+        //public int DiscardedEdges { get; protected set; }
 		public int TotalEdges { get; protected set; }
 
         private NodeGoalBounds startingNodeGoalBounds;
+
+        private GoalBoundsDijkstraMapFlooding digjstra;
 
 
         public override string AlgorithmName {
@@ -28,6 +33,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
         public GoalBoundingPathfinding(NavMeshPathGraph graph, IHeuristic heuristic, GoalBoundingTable goalBoundsTable) : base(graph, heuristic)
         {
             this.GoalBoundingTable = goalBoundsTable;
+            digjstra = new GoalBoundsDijkstraMapFlooding(graph);
+
         }
 
         public override void InitializePathfindingSearch(Vector3 startPosition, Vector3 goalPosition) {
@@ -44,10 +51,36 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             var childNode = connectionEdge.ToNode;
             var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
             TotalEdges++;
-            if(GoalBoundingTable.table[parentNode.node.NodeIndex].connectionBounds[edgeIndex].PositionInsideBounds(childNodeRecord.node.LocalPosition)){
-                    base.ProcessChildNode(parentNode,connectionEdge,edgeIndex);
-                    return;
+            var table = GoalBoundingTable;
+            var xD = table.table;
+            var b = xD;
+            NodeGoalBounds pls = GoalBoundingTable.table[0] as NodeGoalBounds;
+            //Debug.Log(parentNode.node.NodeIndex);
+            //Debug.Log(pls);
+            var a = pls;
+            
+            NodeGoalBounds ngb  = (NodeGoalBounds) ScriptableObject.CreateInstance(typeof(NodeGoalBounds));
+            var outConnectionsStart = parentNode.node.OutEdgeCount;
+            ngb.connectionBounds = new Bounds[outConnectionsStart];
+            for (int i = 0; i < ngb.connectionBounds.Length; i++)
+            {
+                ngb.connectionBounds[i] = (Bounds)ScriptableObject.CreateInstance(typeof(Bounds));
             }
+            digjstra.Search(parentNode.node, ngb);
+
+            //Debug.Log("1-"+ngb.connectionBounds[edgeIndex].minx);
+            //Debug.Log("2-" + ngb.connectionBounds[edgeIndex].maxx);
+            //Debug.Log("3-" + ngb.connectionBounds[edgeIndex].maxz);
+            //Debug.Log("4-" + ngb.connectionBounds[edgeIndex].minz);
+            if (ngb.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition))
+            {
+                base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
+                       return;
+            }
+            //if (GoalBoundingTable.table[parentNode.node.NodeIndex].connectionBounds[edgeIndex].PositionInsideBounds(childNodeRecord.node.LocalPosition)){
+            //       base.ProcessChildNode(parentNode,connectionEdge,edgeIndex);
+            //       return;
+            //}
             DiscardedEdges++;
 
             //var childNodeStatus = childNodeRecord.status;
@@ -69,5 +102,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             //    Open.AddToOpen(childNodeRecord);
             //}
         }
+        
+
     }
 }

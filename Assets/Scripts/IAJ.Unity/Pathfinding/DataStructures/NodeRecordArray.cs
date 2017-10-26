@@ -68,6 +68,12 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures
 
         void IClosedSet.Initialize()
         {
+            for (int i = 0; i < this.NodeRecords.Length; i++)
+            {
+                this.NodeRecords[i].status = NodeStatus.Unvisited;
+            }
+
+            this.SpecialCaseNodes.Clear();
         }
 
         public void AddToOpen(NodeRecord nodeRecord)

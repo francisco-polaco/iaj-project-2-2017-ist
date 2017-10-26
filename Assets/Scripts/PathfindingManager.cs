@@ -68,6 +68,7 @@ namespace Assets.Scripts
             nodeArrayPathFinding = 
                 new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic());
             var goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
+            Debug.Log("Node 0: " + goalBoundTable.table[0]);
             goalBoundingPathfinding = 
                 new GoalBoundingPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic(), goalBoundTable);
             this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], aStarPathfinding);

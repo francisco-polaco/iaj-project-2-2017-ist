@@ -42,37 +42,35 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         public void Search(NavigationGraphNode startNode, NodeGoalBounds nodeGoalBounds)
         {
-            var nodeRecords = NodeRecordArray.NodeRecords;
-            for (int i = 0; i < nodeRecords.Length; i++)
-            {
-                nodeRecords[i].gValue = float.MaxValue;
-            }
-
-
-
+            //UnityEngine.Debug.Log("Initial count: "+ Open.CountOpen());
             var startNodeRecord = this.NodeRecordArray.GetNodeRecord(startNode);
             startNodeRecord.gValue = 0;
 
-            Open.AddToOpen(startNodeRecord);
+            //Open.AddToOpen(startNodeRecord);
             
             Closed.AddToClosed(startNodeRecord);
+            //UnityEngine.Debug.Log("Initial count2: " + Open.CountOpen());
+
             var outConnectionsStart = startNodeRecord.node.OutEdgeCount;
             //nodeGoalBounds.connectionBounds = new Bounds[outConnectionsStart];
-            UnityEngine.Debug.Log("xDzinho" + outConnectionsStart);
+            //UnityEngine.Debug.Log("xDzinho: " + outConnectionsStart);
             for (int i = 0; i < outConnectionsStart; i++)
             {
+                //UnityEngine.Debug.Log("i: " + i);
                 ProcessChildNode(startNodeRecord, startNodeRecord.node.EdgeOut(i), i);
 
                 NavigationGraphNode childNode = startNodeRecord.node.EdgeOut(i).ToNode;
                 var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
                 nodeGoalBounds.connectionBounds[i].UpdateBounds(childNodeRecord.node.LocalPosition);
             }
-            
-
+            //UnityEngine.Debug.Log("Max connection Bounds: " + nodeGoalBounds.connectionBounds.Length);
+            //UnityEngine.Debug.Log("Out Connections Start: " + outConnectionsStart);
+            //UnityEngine.Debug.Log("Open.CountOpen: "+ Open.CountOpen());
             while (Open.CountOpen() > 0)
             {
                 var bestNode = Open.GetBestAndRemove();
                 Closed.AddToClosed(bestNode);
+                //UnityEngine.Debug.Log("Parent index: " + bestNode.StartNodeOutConnectionIndex);
                 nodeGoalBounds.connectionBounds[bestNode.StartNodeOutConnectionIndex]
                     .UpdateBounds(bestNode.node.LocalPosition);
                 var outConnections = bestNode.node.OutEdgeCount;
@@ -82,6 +80,9 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 }
 
             }
+
+            this.Open.Initialize();
+            this.Closed.Initialize();
         }
 
        
@@ -90,7 +91,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             NavigationGraphNode childNode = connectionEdge.ToNode;
             var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
             
-
+            //UnityEngine.Debug.Log("connectionIndex: "+ connectionIndex);
             var open = Open.SearchInOpen(childNodeRecord);
             var close = Closed.SearchInClosed(childNodeRecord);
             if (open == null && close == null)
@@ -98,10 +99,12 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 float g = parent.gValue + (childNode.LocalPosition - parent.node.LocalPosition).magnitude;
 
                 UpdateNode(parent, childNodeRecord, g, 0, F(childNodeRecord),connectionIndex);
+                //UnityEngine.Debug.Log("Morri por dentro: "+ childNodeRecord.StartNodeOutConnectionIndex);
                 Open.AddToOpen(childNodeRecord);
             }
             else if (open != null)
             {
+                //UnityEngine.Debug.Log("Nunca entro aqui.");
                 var g = parent.gValue + (childNode.LocalPosition - parent.node.LocalPosition).magnitude;
 
                 if (g < childNodeRecord.gValue)

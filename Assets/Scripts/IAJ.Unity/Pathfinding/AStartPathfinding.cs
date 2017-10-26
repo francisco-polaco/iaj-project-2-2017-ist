@@ -28,6 +28,10 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
         public Vector3 GoalPosition { get; protected set; }
 
 
+        public int DiscardedEdges { get; protected set; }
+
+
+
         public virtual string AlgorithmName {
             get {
                 return "AStarPathfinding";
@@ -45,6 +49,9 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             this.NodesPerFrame = uint.MaxValue; //by default we process all nodes in a single request
             this.InProgress = false;
             this.Heuristic = heuristic;
+
+
+            this.DiscardedEdges = 0;
         }
 
         public virtual void InitializePathfindingSearch(Vector3 startPosition, Vector3 goalPosition)
@@ -132,6 +139,15 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                     solution = CalculateSolution(bestNode, false);
                     UpdateInfo(initialFrameTime);
 
+
+                    if (DiscardedEdges != 0)
+                    {
+                        Debug.Log("Discarded: " + DiscardedEdges);
+                    }
+                    else
+                    {
+                        Debug.Log("Estou tao na merda");
+                    }
                     return true;
                 }
                 Closed.AddToClosed(bestNode);
@@ -145,6 +161,9 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                 {
                     solution = CalculateSolution(bestNode, true);
                     UpdateInfo(initialFrameTime);
+
+
+                    
                     return false;
                 }
             }
@@ -152,6 +171,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             UpdateInfo(initialFrameTime);
             InProgress = false;
             solution = null;
+
+            
             return true;
         }
 
