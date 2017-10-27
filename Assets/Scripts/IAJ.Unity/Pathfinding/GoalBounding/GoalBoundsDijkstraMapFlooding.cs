@@ -6,6 +6,7 @@ using RAIN.Navigation.NavMesh;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine.Assertions.Comparers;
+using UnityEngine;
 
 namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 {
@@ -26,7 +27,9 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         public IOpenSet Open { get; protected set; }
         public IClosedSet Closed { get; protected set; }
+
         
+
         public GoalBoundsDijkstraMapFlooding(NavMeshPathGraph graph)
         {
             this.NavMeshGraph = graph;
@@ -44,12 +47,21 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         public void Search(NavigationGraphNode startNode, NodeGoalBounds nodeGoalBounds)
         {
-            this.Open.Initialize();
-            this.Closed.Initialize();
+            //this.Open.Initialize();
+            //this.Closed.Initialize();
+            this.NodeRecordArray = new NodeRecordArray(this.GetNodesHack(this.NavMeshGraph));
+            this.Open = this.NodeRecordArray;
+            this.Closed = this.NodeRecordArray;
+            //this.Open.Initialize();
+            //this.Closed.Initialize();
+
+
             StartNode = startNode;
             //UnityEngine.Debug.Log("Initial count: "+ Open.CountOpen());
             var startNodeRecord = this.NodeRecordArray.GetNodeRecord(startNode);
             startNodeRecord.gValue = 0;
+            startNodeRecord.hValue = 0;
+            startNodeRecord.fValue = F(startNodeRecord);
 
             //Open.AddToOpen(startNodeRecord);
             
@@ -90,6 +102,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
        
         protected void ProcessChildNode(NodeRecord parent, NavigationGraphEdge connectionEdge, int connectionIndex)
         {
+            
+
             NavigationGraphNode childNode = connectionEdge.ToNode;
             var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
             
@@ -98,20 +112,20 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             var close = Closed.SearchInClosed(childNodeRecord);
             if (open == null && close == null)
             {
-                float g = parent.gValue + (childNode.LocalPosition - parent.node.LocalPosition).magnitude;
+                float g = parent.gValue + (childNodeRecord.node.LocalPosition - parent.node.LocalPosition).magnitude;
 
-                UpdateNode(parent, childNodeRecord, g, 0, F(childNodeRecord),connectionIndex);
+                UpdateNode(parent, childNodeRecord, g, 0, g,connectionIndex);
                 //UnityEngine.Debug.Log("Morri por dentro: "+ childNodeRecord.StartNodeOutConnectionIndex);
                 Open.AddToOpen(childNodeRecord);
             }
             else if (open != null)
             {
                 //UnityEngine.Debug.Log("Nunca entro aqui.");
-                var g = parent.gValue + (childNode.LocalPosition - parent.node.LocalPosition).magnitude;
+                var g = parent.gValue + (childNodeRecord.node.LocalPosition - parent.node.LocalPosition).magnitude;
 
                 if (g < childNodeRecord.gValue)
                 {
-                    UpdateNode(parent, childNodeRecord, g, 0, F(childNodeRecord), connectionIndex);
+                    UpdateNode(parent, childNodeRecord, g, 0, g, connectionIndex);
                     Open.Replace(childNodeRecord, childNodeRecord);
                 }
             }

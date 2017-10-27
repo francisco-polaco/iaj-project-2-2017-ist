@@ -1,5 +1,7 @@
 ﻿
 using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures;
+using Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding;
+using Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding;
 using Assets.Scripts.IAJ.Unity.Pathfinding.Heuristics;
 using Assets.Scripts.IAJ.Unity.Pathfinding.Path;
 using RAIN.Navigation.Graph;
@@ -30,7 +32,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
 
         public int DiscardedEdges { get; protected set; }
 
-
+        //PASS TO GOALBOUNDSPATHFINDING
+        
 
         public virtual string AlgorithmName {
             get {
@@ -154,6 +157,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                 }
                 Closed.AddToClosed(bestNode);
                 var outConnections = bestNode.node.OutEdgeCount;
+
+                //TODO DELETE
+
+                
+
                 for (int i = 0; i < outConnections; i++)
                 {
                     ProcessChildNode(bestNode, bestNode.node.EdgeOut(i), i);

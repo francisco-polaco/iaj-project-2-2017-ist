@@ -146,7 +146,7 @@ namespace Assets.Scripts {
             Debug.Log("Node 0: " + goalBoundTable.table[0]);
             goalBoundingPathfinding =
                 new GoalBoundingPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic(), goalBoundTable);
-            this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], aStarPathfinding);
+            this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], goalBoundingPathfinding);
         }
 
 
@@ -259,7 +259,6 @@ namespace Assets.Scripts {
                         solutionIndex = 0;
                         //Smooth it
                         smoothedSolution = pathSmoothing.Smooth(currentSolution);
-
                         smoothedSolution = pathSmoothing.Smooth(smoothedSolution);
                         smoothedSolution = pathSmoothing.Smooth(smoothedSolution);
                     }
@@ -318,11 +317,12 @@ namespace Assets.Scripts {
                                     + "\n\nUsage: "
                                     + "\n  1st Select Algorithm"
                                     + "\n  2nd Choose The points (1 - 6)"
-                                    + "\n\n\nDraw All " + NavigationManager.Instance.NavMeshGraphs[0].Size + " Nodes -> " + drawNavMeshKey.ToString()
+                                    + "\n\n\nDraw All Nodes -> " + drawNavMeshKey.ToString()
                                     + "\nStep By Step: " + debugStepByStep + " (" + toggleDebugStepByStepKey + " to toggle)"
                                     + "\nNext Step: " + advanceToNextFrameKey
                                     + "\nSteps Done: " + numberOfSteps
                                     + "\nNodes Per Frame (+"+IncreaseNodesPerFrameKey + " *5" + Increase5TimesNodesPerFrameKey+"),(-"+DecreaseNodesPerFrameKey+" *5"+ Decrease5TimesNodesPerFrameKey+")"
+                                    + "\nTotalFrames" + frameCount
                                     + "\n\nBounds only:"
                                     + "\n  Bounds Limits: "  +drawBoundsKey           + " : " + drawBounds
                                     + "\n  DirectChildren: " +drawDirectChildrenKey   + " : " + drawDirectChildren
@@ -354,7 +354,7 @@ namespace Assets.Scripts {
                            + "\nProcessing time (ms): " + time.ToString("F")
                            + "\nReal Processing time (ms): " + (PathFinding.PureTotalTime * 1000).ToString("F")
                            + "\nTime per Node (ms):" + timePerNode.ToString("F4")
-                           + "\n" + frameCount
+                           
                            ;
 
                 //guiStyle.normal.textColor = Color.black;
@@ -362,6 +362,27 @@ namespace Assets.Scripts {
                 //GUI.Label(new Rect(10, 440, 300, 200), text, guiStyle);
             }
             GUI.Label(new Rect(10, 40, 300, 250), alwaysOnText, guiStyle);
+
+            var rightSideText = "TotalMeshNodes:" + NavigationManager.Instance.NavMeshGraphs[0].Size
+                             + "\nVisitedNodes: " + this.PathFinding.Closed.All().Count + " (" + (((this.PathFinding.Closed.All().Count * 1.0f) / NavigationManager.Instance.NavMeshGraphs[0].Size ) * 100) + "%)"
+                             + "\nVisited + Open: " + (this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count) * 1.0f) / NavigationManager.Instance.NavMeshGraphs[0].Size) * 100) + "%)"
+                             + "\n";
+
+
+            var goalBoundPathFinding = this.PathFinding as GoalBoundingPathfinding;
+            if(goalBoundingPathfinding != null) {
+                rightSideText += "\nConsidered Nodes: " + goalBoundingPathfinding.TotalEdges
+                                   + "\nVisited Edges: " + (goalBoundingPathfinding.TotalEdges - goalBoundingPathfinding.DiscardedEdges)
+                                   + "\nDiscarded Edges: " + goalBoundingPathfinding.DiscardedEdges + " ( " + Mathf.Floor((goalBoundingPathfinding.DiscardedEdges * 1.0f) / (goalBoundingPathfinding.TotalEdges * 1.0f) * 100) + "% )";
+                                   
+
+
+
+
+
+
+            }
+            GUI.Label(new Rect(Screen.currentResolution.width- 380, 40, 400, 250), rightSideText, guiStyle);
         }
 
         public void OnDrawGizmos() {
