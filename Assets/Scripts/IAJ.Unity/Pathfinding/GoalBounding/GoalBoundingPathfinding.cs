@@ -70,7 +70,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             digjstra.Search(parentNode.node, ngb);
             toPrintNodeGoulBounds = ngb;
             Debug.Log(edgeIndex);
-            Debug.Log("x min:"+ngb.connectionBounds[edgeIndex].minx + " x max:" + ngb.connectionBounds[edgeIndex].maxx+ " z min:" + ngb.connectionBounds[edgeIndex].maxz + " z max:" + ngb.connectionBounds[edgeIndex].minz);
+            Debug.Log("x min:"+ngb.connectionBounds[edgeIndex].minx + " x max:" + ngb.connectionBounds[edgeIndex].maxx+ " z min:" + ngb.connectionBounds[edgeIndex].minz + " z max:" + ngb.connectionBounds[edgeIndex].maxz);
             Debug.Log("GoalPosition: " + GoalPosition);
             Debug.Log("Goal in Bound:" + ngb.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition));
             if (ngb.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition))

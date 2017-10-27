@@ -11,7 +11,23 @@ using Bounds = Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding.
 
 namespace Assets.Scripts {
     public class PathfindingManager : MonoBehaviour {
-        private const int NodesPerFrame = 1;
+        private const int paceNodesPerFrame = 1;
+        private uint NodesPerFrame = 1;
+
+        private bool debugStepByStep = true;
+        private bool canAdvanceStep = true;
+        private KeyCode advanceToNextFrameKey = KeyCode.S;
+        private KeyCode toggleDebugStepByStepKey = KeyCode.D;
+
+        private bool drawBounds = false;
+        private bool drawDirectChildren = false;
+        private bool drawAllNodesOfBounds = false;
+        private KeyCode drawBoundsKey = KeyCode.Q;
+        private KeyCode drawDirectChildrenKey = KeyCode.W;
+        private KeyCode drawAllNodesOfBoundsKey = KeyCode.E;
+
+
+
 
         //public fields to be set in Unity Editor
         public GameObject endDebugSphere;
@@ -38,6 +54,7 @@ namespace Assets.Scripts {
         private bool draw = true;
         private int solutionIndex = 0;
         private int frameCount = 0;
+        private int numberOfSteps = 0;
         //public properties
         public AStarPathfinding PathFinding { get; private set; }
 
@@ -49,10 +66,63 @@ namespace Assets.Scripts {
         private readonly KeyCode NodeArrayKeyStart = KeyCode.N;
         private readonly KeyCode GoalBoundKeyStart = KeyCode.G;
         private readonly KeyCode ClearKey = KeyCode.C;
+        private readonly KeyCode DecreaseNodesPerFrameKey = KeyCode.L;
+        private readonly KeyCode IncreaseNodesPerFrameKey = KeyCode.O;
+        private readonly KeyCode Decrease5TimesNodesPerFrameKey = KeyCode.K;
+        private readonly KeyCode Increase5TimesNodesPerFrameKey = KeyCode.I;
         private GUIStyle guiStyle = new GUIStyle(); //to change font size
-        private Bounds[] boundito;
-        private Color[] c = new Color[] { Color.blue, Color.green, Color.red, Color.magenta, Color.yellow, Color.gray, Color.cyan };
+        private Bounds[] boundsInformationContainer;
+        private Color[] c = new Color[] { new Color(128f/255f, 128f/255f, 0f/255f) ,
+                                            new Color(230f/255f, 25f/255f, 75f/255f)   ,
+                                            new Color(60f/255f, 180f/255f, 75f/255f)   ,
+                                            new Color(255f/255f, 225f/255f, 25f/255f)  ,
+                                            new Color(0f/255f, 130f/255f, 200f/255f)   ,
+                                            new Color(245f/255f, 130f/255f, 48f/255f)  ,
+                                            new Color(145f/255f, 30f/255f, 180f/255f)  ,
+                                            new Color(70f/255f, 240f/255f, 240f/255f)  ,
+                                            new Color(240f/255f, 50f/255f, 230f/255f)  ,
+                                            new Color(210f/255f, 245f/255f, 60f/255f)  ,
+                                            new Color(250f/255f, 190f/255f, 190f/255f) ,
+                                            new Color(0f/255f, 128f/255f, 128f/255f)   ,
+                                            new Color(230f/255f, 190f/255f, 255f/255f) ,
+                                            new Color(170f/255f, 110f/255f, 40f/255f)  ,
+                                            new Color(255f/255f, 250f/255f, 200f/255f) ,
+                                            new Color(128f/255f, 0f/255f, 0f/255f   ) ,
+                                            new Color(170f/255f, 255f/255f, 195f/255f) ,
+                                            new Color(255f/255f, 215f/255f, 180f/255f) ,
+                                            new Color(0f/255f, 0f/255f, 128f/255f) ,
+                                            new Color(0f/255f, 0f/255f, 0         ),
+                                            new Color(128f/255f, 128f/255f, 128f/255f)   
+                        };
+        //Olive
+        //Red
+        //Green
+        //Yellow
+        //Blue
+        //Orange
+        //Purple
+        //Cyan
+        //Magenta
+        //Lime
+        //Pink
+        //Teal
+        //Lavender
+        //Brown
+        //Beige
+        //Maroon
+        //Mint
+        //Coral
+        //Navy
+        //Black
+        //Grey
 
+
+        private void setNodesPerFrame(uint number) {
+            aStarPathfinding.NodesPerFrame = number;
+            nodeArrayPathFinding.NodesPerFrame = number;
+            goalBoundingPathfinding.NodesPerFrame = number;
+            this.NodesPerFrame = number;
+        }
 
         public void Initialize(NavMeshPathGraph navMeshGraph, AStarPathfinding pathfindingAlgorithm) {
             guiStyle.fontSize = 20;
@@ -60,7 +130,7 @@ namespace Assets.Scripts {
             this.navMesh = navMeshGraph;
 
             this.PathFinding = pathfindingAlgorithm;
-            this.PathFinding.NodesPerFrame = NodesPerFrame;
+            setNodesPerFrame(NodesPerFrame);
         }
 
         // Use this for initialization
@@ -134,6 +204,8 @@ namespace Assets.Scripts {
                 this.startPosition = this.p3.transform.localPosition;
                 this.endPosition = this.p4.transform.localPosition;
                 this.InitializePathFinding(this.startPosition, endPosition);
+
+
             } else if (Input.GetKeyDown(drawNavMeshKey)) {
                 this.drawNavMesh = !this.drawNavMesh;
             } else if (Input.GetKeyDown(NodeArrayKeyStart)) {
@@ -143,26 +215,54 @@ namespace Assets.Scripts {
             } else if (Input.GetKeyDown(GoalBoundKeyStart)) {
                 this.PathFinding = goalBoundingPathfinding;
                 this.InitializePathFinding(this.startPosition, endPosition);
-
             } else if (Input.GetKeyDown(NormalAStarKeyStart)) {
                 this.PathFinding = aStarPathfinding;
                 this.InitializePathFinding(this.startPosition, endPosition);
+
+
             } else if (Input.GetKeyDown(ClearKey)) {
                 this.currentSolution = null;
-                
+                this.PathFinding.InProgress = false;
+            } else if (Input.GetKeyDown(IncreaseNodesPerFrameKey)) {
+                this.setNodesPerFrame(NodesPerFrame + paceNodesPerFrame);
+            } else if (Input.GetKeyDown(DecreaseNodesPerFrameKey)) {
+                if (NodesPerFrame > paceNodesPerFrame) {
+                    this.setNodesPerFrame(NodesPerFrame - paceNodesPerFrame);
+                }
+            } else if (Input.GetKeyDown(Increase5TimesNodesPerFrameKey)) {
+                this.setNodesPerFrame(NodesPerFrame + paceNodesPerFrame * 5);
+            } else if (Input.GetKeyDown(Decrease5TimesNodesPerFrameKey)) {
+                if (NodesPerFrame > paceNodesPerFrame * 5) {
+                    this.setNodesPerFrame(NodesPerFrame - paceNodesPerFrame * 5);
+                }
+            } else if (Input.GetKeyDown(advanceToNextFrameKey)) {
+                canAdvanceStep = true;
+                numberOfSteps++;
+            } else if (Input.GetKeyDown(toggleDebugStepByStepKey)) {
+                debugStepByStep = !debugStepByStep;
+            } else if (Input.GetKeyDown(drawBoundsKey)){
+                drawBounds = !drawBounds;
+            } else if (Input.GetKeyDown(drawDirectChildrenKey)){
+                drawDirectChildren = !drawDirectChildren;
+            } else if (Input.GetKeyDown(drawAllNodesOfBoundsKey)){
+                drawAllNodesOfBounds = !drawAllNodesOfBounds;
             }
+           
 
             //call the pathfinding method if the user specified a new goal
             if (this.PathFinding.InProgress) {
-                var finished = this.PathFinding.Search(out this.currentSolution, true);
-                if (finished && currentSolution != null) {
-                    currentSolution.PathPositions.Insert(0, startPosition);
-                    solutionIndex = 0;
-                    //Smooth it
-                    smoothedSolution = pathSmoothing.Smooth(currentSolution);
+                if(!debugStepByStep || (debugStepByStep && canAdvanceStep)){
+                    canAdvanceStep = false;
+                    var finished = this.PathFinding.Search(out this.currentSolution, true);
+                    if (finished && currentSolution != null) {
+                        currentSolution.PathPositions.Insert(0, startPosition);
+                        solutionIndex = 0;
+                        //Smooth it
+                        smoothedSolution = pathSmoothing.Smooth(currentSolution);
 
-                    smoothedSolution = pathSmoothing.Smooth(smoothedSolution);
-                    smoothedSolution = pathSmoothing.Smooth(smoothedSolution);
+                        smoothedSolution = pathSmoothing.Smooth(smoothedSolution);
+                        smoothedSolution = pathSmoothing.Smooth(smoothedSolution);
+                    }
                 }
             }
 
@@ -179,7 +279,7 @@ namespace Assets.Scripts {
                     a.connectionBounds[i] = new Bounds();
                 }
                 mapFloodingAlgorithm.Search(StartNode, a);
-                this.boundito = a.connectionBounds;
+                this.boundsInformationContainer = a.connectionBounds;
                 Debug.Log(a.connectionBounds.Length);
 
             }
@@ -197,7 +297,7 @@ namespace Assets.Scripts {
                 }
                 mapFloodingAlgorithm.Search(StartNode, a);
 
-                this.boundito = a.connectionBounds;
+                this.boundsInformationContainer = a.connectionBounds;
                 Debug.Log(a.connectionBounds.Length);
             }
         }
@@ -217,12 +317,21 @@ namespace Assets.Scripts {
                                     + "\nGoalBound -> " + GoalBoundKeyStart.ToString()
                                     + "\n\nUsage: "
                                     + "\n  1st Select Algorithm"
-                                    + "\n  2nd Choose The points (1 - 6 alpha numbers OR click)"
-                                    + "\n\n\nDraw All Nodes -> " + drawNavMeshKey.ToString()
+                                    + "\n  2nd Choose The points (1 - 6)"
+                                    + "\n\n\nDraw All " + NavigationManager.Instance.NavMeshGraphs[0].Size + " Nodes -> " + drawNavMeshKey.ToString()
+                                    + "\nStep By Step: " + debugStepByStep + " (" + toggleDebugStepByStepKey + " to toggle)"
+                                    + "\nNext Step: " + advanceToNextFrameKey
+                                    + "\nSteps Done: " + numberOfSteps
+                                    + "\nNodes Per Frame (+"+IncreaseNodesPerFrameKey + " *5" + Increase5TimesNodesPerFrameKey+"),(-"+DecreaseNodesPerFrameKey+" *5"+ Decrease5TimesNodesPerFrameKey+")"
+                                    + "\n\nBounds only:"
+                                    + "\n  Bounds Limits: "  +drawBoundsKey           + " : " + drawBounds
+                                    + "\n  DirectChildren: " +drawDirectChildrenKey   + " : " + drawDirectChildren
+                                    + "\n  All nodes: "      +drawAllNodesOfBoundsKey + " : " + drawAllNodesOfBounds
+                                    
                 ;
             guiStyle.normal.textColor = Color.black;
             guiStyle.fontSize = 20;
-            GUI.Label(new Rect(10, 40, 300, 250), alwaysOnText, guiStyle);
+
 
 
 
@@ -238,97 +347,25 @@ namespace Assets.Scripts {
                 }
 
 
-                var text = "NodesPerFrame: " + NodesPerFrame
+                alwaysOnText += "\n\nNodesPerFrame: " + NodesPerFrame
                            + "\nNodes Visited: " + this.PathFinding.TotalExploredNodes
                            + "\nMaximum Open Size: " + this.PathFinding.MaxOpenNodes
+                           + "\nCurrent Open Size: " + this.PathFinding.Open.All().Count 
                            + "\nProcessing time (ms): " + time.ToString("F")
                            + "\nReal Processing time (ms): " + (PathFinding.PureTotalTime * 1000).ToString("F")
                            + "\nTime per Node (ms):" + timePerNode.ToString("F4")
                            + "\n" + frameCount
                            ;
 
-                guiStyle.normal.textColor = Color.black;
-                guiStyle.fontSize = 20;
-                GUI.Label(new Rect(10, 280, 300, 200), text, guiStyle);
+                //guiStyle.normal.textColor = Color.black;
+                //guiStyle.fontSize = 20;
+                //GUI.Label(new Rect(10, 440, 300, 200), text, guiStyle);
             }
+            GUI.Label(new Rect(10, 40, 300, 250), alwaysOnText, guiStyle);
         }
 
         public void OnDrawGizmos() {
             frameCount++;
-            var boundBoxAlgorithm = PathFinding as GoalBoundingPathfinding;
-            if(boundBoxAlgorithm != null) {
-
-                mapFloodingAlgorithm = boundBoxAlgorithm.digjstra;
-                if(boundBoxAlgorithm.toPrintNodeGoulBounds != null) {
-                    this.boundito = boundBoxAlgorithm.toPrintNodeGoulBounds.connectionBounds;
-                }
-
-            }
-
-            if (this.boundito != null && mapFloodingAlgorithm != null && mapFloodingAlgorithm.Closed != null) {
-                var colorrrr = Color.black;
-                foreach (var node in mapFloodingAlgorithm.Closed.All()) {
-                    var boundIndex = node.StartNodeOutConnectionIndex;
-                    if (boundIndex >= c.Length) {
-                        colorrrr = Color.black;
-                    } else {
-                        colorrrr = c[boundIndex];
-                    }
-                    Gizmos.color = colorrrr;
-                    Gizmos.DrawSphere(node.node.LocalPosition, 1f);
-                }
-                for (int i = 0; i < mapFloodingAlgorithm.StartNode.OutEdgeCount;i++) {
-                    var rainNode = mapFloodingAlgorithm.StartNode.EdgeOut(i).ToNode;
-
-                    var nodeToPrint = mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(rainNode);
-                    var boundIndex = nodeToPrint.StartNodeOutConnectionIndex;
-                    if (boundIndex >= c.Length) {
-                        colorrrr = Color.black;
-                    } else {
-                        colorrrr = c[boundIndex];
-                    }
-                    Gizmos.color = colorrrr;
-                    Gizmos.DrawSphere(nodeToPrint.node.LocalPosition, 0.5f);
-                }
-                Gizmos.color = Color.black;
-                Gizmos.DrawSphere(mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(mapFloodingAlgorithm.StartNode).node.LocalPosition, 0.5f);
-
-
-                var nrOfPoints = 0;
-                var index = 0;
-                colorrrr = Color.black;
-                string boxes = "";
-                foreach (var bound in boundito) {
-                    if (index >= c.Length) {
-                        colorrrr = Color.black;
-                    } else {
-                        colorrrr = c[index];
-                    }
-                    boxes += "\n" + index + " : " + bound.minx + " -> " + bound.maxx + " _z_ " + +bound.minz + " -> " + bound.maxz;
-                    if (bound.minx == bound.maxx && bound.minz == bound.maxz) {
-                        nrOfPoints++;
-                        Gizmos.color = Color.cyan;
-                        Gizmos.DrawSphere(new Vector3(bound.minx, 0, bound.minz), 0.5f);
-                    } else {
-                        Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.minx, 0, bound.maxz), colorrrr);
-                        Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
-                        Debug.DrawLine(new Vector3(bound.minx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.maxz), colorrrr);
-                        Debug.DrawLine(new Vector3(bound.maxx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
-                    }
-                    index++;
-                }
-                //Debug.Log(boxes);
-                //Debug.Log("nrOfPoints: " + nrOfPoints);
-
-            }
-            if (this.drawNavMesh) {
-                var navMesh = this.PathFinding.NavMeshGraph;
-                Gizmos.color = Color.cyan;
-                for (int index = 0; index < navMesh.Size; index++) {
-                    var node = navMesh.GetNode(index);
-                    Gizmos.DrawSphere(node.LocalPosition, 0.4f);
-                }
-            }
             if (this.draw) {
                 //draw the current Solution Path if any (for debug purposes)
                 if (this.currentSolution != null) {
@@ -363,28 +400,100 @@ namespace Assets.Scripts {
                     Gizmos.color = Color.magenta;
                     if (this.PathFinding.Open != null) {
                         foreach (var nodeRecord in this.PathFinding.Open.All()) {
-                            Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.0f);
+                            Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.5f);
                         }
                     }
                     Gizmos.color = Color.blue;
-
                     if (this.PathFinding.Closed != null) {
                         foreach (var nodeRecord in this.PathFinding.Closed.All()) {
-                            Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 1f);
-                        }
-                    }
-
-                    Gizmos.color = Color.blue;
-
-                    if (this.PathFinding.Closed != null)
-                    {
-                        foreach (var nodeRecord in this.PathFinding.Closed.All())
-                        {
-                            Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 1f);
+                            Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.5f);
                         }
                     }
                 }
             }
+
+            var boundBoxAlgorithm = PathFinding as GoalBoundingPathfinding;
+            if(boundBoxAlgorithm != null) {
+
+                mapFloodingAlgorithm = boundBoxAlgorithm.digjstra;
+                if(boundBoxAlgorithm.toPrintNodeGoulBounds != null) {
+                    this.boundsInformationContainer = boundBoxAlgorithm.toPrintNodeGoulBounds.connectionBounds;
+                }
+
+            }
+
+            if (this.boundsInformationContainer != null && mapFloodingAlgorithm != null && mapFloodingAlgorithm.Closed != null) {
+                var colorrrr = Color.black;
+                if (drawAllNodesOfBounds) {
+                    foreach (var node in mapFloodingAlgorithm.Closed.All()) {
+                        var boundIndex = node.StartNodeOutConnectionIndex;
+                        if (boundIndex >= c.Length) {
+                            colorrrr = Color.black;
+                        } else {
+                            colorrrr = c[boundIndex];
+                        }
+                        Gizmos.color = colorrrr;
+                        Gizmos.DrawSphere(node.node.LocalPosition, 1f);
+                    }
+                }
+                if (drawDirectChildren) {
+                    for (int i = 0; i < mapFloodingAlgorithm.StartNode.OutEdgeCount; i++) {
+                        var rainNode = mapFloodingAlgorithm.StartNode.EdgeOut(i).ToNode;
+
+                        var nodeToPrint = mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(rainNode);
+                        var boundIndex = nodeToPrint.StartNodeOutConnectionIndex;
+                        if (boundIndex >= c.Length) {
+                            colorrrr = Color.black;
+                        } else {
+                            colorrrr = c[boundIndex];
+                        }
+                        Gizmos.color = colorrrr;
+                        Gizmos.DrawSphere(nodeToPrint.node.LocalPosition, 2f);
+                    }
+                }
+                Gizmos.color = Color.black;
+                Gizmos.DrawSphere(mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(mapFloodingAlgorithm.StartNode).node.LocalPosition, 0.5f);
+
+
+                var nrOfPoints = 0;
+                var index = 0;
+                colorrrr = Color.black;
+                string boxes = "";
+                if (this.drawBounds) {
+                    foreach (var bound in boundsInformationContainer) {
+                        if (index >= c.Length) {
+                            colorrrr = Color.black;
+                        } else {
+                            colorrrr = c[index];
+                        }
+                        boxes += "\n" + index + " : " + bound.minx + " -> " + bound.maxx + " _z_ " + +bound.minz + " -> " + bound.maxz;
+                        if (bound.minx == bound.maxx && bound.minz == bound.maxz) {
+                            nrOfPoints++;
+                            Gizmos.color = Color.cyan;
+                            Gizmos.DrawSphere(new Vector3(bound.minx, 0, bound.minz), 0.5f);
+                        } else {
+                            Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.minx, 0, bound.maxz), colorrrr);
+                            Debug.DrawLine(new Vector3(bound.minx, 0, bound.minz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
+                            Debug.DrawLine(new Vector3(bound.minx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.maxz), colorrrr);
+                            Debug.DrawLine(new Vector3(bound.maxx, 0, bound.maxz), new Vector3(bound.maxx, 0, bound.minz), colorrrr);
+                        }
+
+                        index++;
+                    }
+                }
+                //Debug.Log(boxes);
+                //Debug.Log("nrOfPoints: " + nrOfPoints);
+
+            }
+            if (this.drawNavMesh) {
+                var navMesh = this.PathFinding.NavMeshGraph;
+                Gizmos.color = Color.cyan;
+                for (int index = 0; index < navMesh.Size; index++) {
+                    var node = navMesh.GetNode(index);
+                    Gizmos.DrawSphere(node.LocalPosition, 0.4f);
+                }
+            }
+            
         }
 
         private bool MouseClickPosition(out Vector3 position) {
@@ -417,7 +526,7 @@ namespace Assets.Scripts {
 
             this.currentSolution = null;
             this.draw = true;
-
+            numberOfSteps = 0;
             this.PathFinding.InitializePathfindingSearch(this.startPosition, this.endPosition);
         }
     }

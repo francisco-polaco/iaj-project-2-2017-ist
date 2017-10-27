@@ -16,7 +16,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             this.NodeRecordArray = new NodeRecordArray(nodes);
             this.Open = this.NodeRecordArray;
             this.Closed = this.NodeRecordArray;
-            this.NodesPerFrame = 5;
         }
         public override string AlgorithmName {
             get {
@@ -52,30 +51,26 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
 
             //We can only update inside the ifs because otherwise we might be making the node worse
 
-            if (childNodeStatus == NodeStatus.Unvisited)
-            {
+            if (childNodeStatus == NodeStatus.Unvisited) {
                 UpdateNode(bestNode, childNodeRecord, g, h, f);
                 Open.AddToOpen(childNodeRecord);
-            }
-            else if (childNodeStatus == NodeStatus.Open && childNodeRecord.fValue > f)
-            {
+            } else if (childNodeStatus == NodeStatus.Open && childNodeRecord.fValue > f) {
                 UpdateNode(bestNode, childNodeRecord, g, h, f);
                 Open.Replace(childNodeRecord, childNodeRecord);
-            }
-            else if (childNodeStatus == NodeStatus.Closed && childNodeRecord.fValue > f)
-            {
+            } else if (childNodeStatus == NodeStatus.Closed && childNodeRecord.fValue > f) {
                 UpdateNode(bestNode, childNodeRecord, g, h, f);
                 Closed.RemoveFromClosed(childNodeRecord);
                 Open.AddToOpen(childNodeRecord);
-            } else {
-                if(childNodeStatus == NodeStatus.Open) {
-                    UnityEngine.Debug.Log("Open AUTISMOOOO");
-                }
-                if (childNodeStatus == NodeStatus.Closed) {
-                    UnityEngine.Debug.Log("Close AUTISMOOOO");
-                }
-                UnityEngine.Debug.Log("Estou morto");
             }
+            //} else {
+            //    if(childNodeStatus == NodeStatus.Open) {
+            //        UnityEngine.Debug.Log("Open AUTISMOOOO");
+            //    }
+            //    if (childNodeStatus == NodeStatus.Closed) {
+            //        UnityEngine.Debug.Log("Close AUTISMOOOO");
+            //    }
+            //    UnityEngine.Debug.Log("Estou morto");
+            //}
         }
 
         protected void UpdateNode(NodeRecord bestNode, NodeRecord childNode, float g, float h, float f)

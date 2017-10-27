@@ -17,7 +17,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
         public uint TotalExploredNodes { get; protected set; }
         public int MaxOpenNodes { get; protected set; }
         public float TotalProcessingTime { get; protected set; }
-        public bool InProgress { get; protected set; }
+        public bool InProgress { get; set; }
 
         public IOpenSet Open { get; protected set; }
         public IClosedSet Closed { get; protected set; }
