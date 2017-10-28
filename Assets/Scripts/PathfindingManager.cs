@@ -560,9 +560,7 @@ namespace Assets.Scripts {
                     }
 
                 }
-                int cenas = 2;
             }
-            
         }
 
         private bool MouseClickPosition(out Vector3 position) {
@@ -582,6 +580,8 @@ namespace Assets.Scripts {
         }
 
         private void InitializePathFinding(Vector3 p1, Vector3 p2) {
+            //If the algorithm changed we want to removed the node from the mesh
+            this.PathFinding.CleanUp();
 
             //show the start sphere, hide the end one
             //this is just a small adjustment to better see the debug sphere
