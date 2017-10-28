@@ -15,7 +15,7 @@ namespace Assets.Scripts {
         private const int paceNodesPerFrame = 1;
         private uint NodesPerFrame = 1;
 
-        private bool debugStepByStep = true;
+        private bool debugStepByStep = false;
         private bool canAdvanceStep = true;
         private KeyCode advanceToNextFrameKey = KeyCode.S;
         private KeyCode toggleDebugStepByStepKey = KeyCode.D;
