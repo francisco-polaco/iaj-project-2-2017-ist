@@ -65,12 +65,12 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
 
             //perhaps do the dikstra on the fly?
-            if (this.StartNode.Equals(parentNode.node)) {
+            if (this.StartNode.Equals(parentNode.node) || this.StartNode.Equals(childNode)) {
                 base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
                 return;
             }
 
-            if (this.GoalNode.Equals(childNodeRecord.node)) {
+            if (this.GoalNode.Equals(childNodeRecord.node) || this.GoalNode.Equals(childNode)) {
                 base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
                 return;
             }
@@ -88,6 +88,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                     NullTableNodesCount++;
                 }
             }
+            //for debug purposes
+            digjstra.StartNode = parentNode.node;
             if (LiveCalculation || toPrintNodeGoulBounds == null) {
                 computedLive = true;
                 NodeGoalBounds ngb = (NodeGoalBounds)ScriptableObject.CreateInstance(typeof(NodeGoalBounds));
@@ -100,18 +102,18 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 toPrintNodeGoulBounds = ngb;
 
             }
-            //var varToPrintNodeGoulBounds = toPrintNodeGoulBounds;
+            var varToPrintNodeGoulBounds = toPrintNodeGoulBounds;
             ////TODO DELETE JUST WANT TO SEE PRINTED XXX
-            //if(edgeIndex >= varToPrintNodeGoulBounds.connectionBounds.Length) {
-
+            if(edgeIndex >= varToPrintNodeGoulBounds.connectionBounds.Length) {
+                Debug.Log("Why You DO this to me");
             //    return;
             //    //base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
             //    //return;
-            //}
-            Debug.Log("ComputedLive: " + computedLive);
-            Debug.Log("Index:" + edgeIndex + " x:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].minx + " > " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxx 
-                + " z: " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].minz + " > " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxz 
-                + " :GoalPosition: " + GoalPosition + " insideBound?:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition));
+            }
+            //Debug.Log("ComputedLive: " + computedLive);
+            //Debug.Log("Index:" + edgeIndex + " x:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].minx + " > " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxx 
+            //    + " z: " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].minz + " > " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxz 
+            //    + " :GoalPosition: " + GoalPosition + " insideBound?:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition));
             if (toPrintNodeGoulBounds.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition)) {
                 base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
                 return;

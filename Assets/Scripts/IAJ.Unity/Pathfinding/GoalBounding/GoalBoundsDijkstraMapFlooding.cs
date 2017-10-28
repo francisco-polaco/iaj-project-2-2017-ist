@@ -21,7 +21,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
         
 
         public NavMeshPathGraph NavMeshGraph { get; protected set; }
-        public NavigationGraphNode StartNode { get; protected set; }
+        public NavigationGraphNode StartNode { get; set; }
        // public NodeGoalBounds NodeGoalBounds { get; protected set; }
         public NodeRecordArray NodeRecordArray { get; protected set; }
 

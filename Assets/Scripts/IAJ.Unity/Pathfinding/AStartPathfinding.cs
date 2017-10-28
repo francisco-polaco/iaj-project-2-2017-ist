@@ -147,11 +147,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                     solution = CalculateSolution(bestNode, false);
                     UpdateInfo(initialFrameTime);
                     CleanUp();
-
-                    if (DiscardedEdges != 0)
-                    {
-                        Debug.Log("Discarded: " + DiscardedEdges);
-                    }
                     return true;
                 }
                 Closed.AddToClosed(bestNode);
@@ -201,7 +196,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             return this.NavMeshGraph.QuantizeToNode(position, 1.0f);
         }
 
-        protected void CleanUp()
+        public void CleanUp()
         {
             //I need to remove the connections created in the initialization process
             if (this.StartNode != null)

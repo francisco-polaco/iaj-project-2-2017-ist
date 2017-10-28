@@ -6,6 +6,7 @@ using Assets.Scripts.IAJ.Unity.Pathfinding.Heuristics;
 using Assets.Scripts.IAJ.Unity.Pathfinding.Path;
 using RAIN.Navigation;
 using RAIN.Navigation.NavMesh;
+using System.Collections.Generic;
 using UnityEngine;
 using Bounds = Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding.Bounds;
 
@@ -143,22 +144,22 @@ namespace Assets.Scripts {
         // Use this for initialization
         void Awake() {
             this.currentClickNumber = 1;
-            mapFloodingAlgorithm = new GoalBoundsDijkstraMapFlooding(NavigationManager.Instance.NavMeshGraphs[0]);
+            navMesh = GameObject.Find("Navigation Mesh").GetComponent<NavMeshRig>().NavMesh.Graph;
+            mapFloodingAlgorithm = new GoalBoundsDijkstraMapFlooding(navMesh);
             //for(int i = 0; i < NavigationManager.Instance.NavMeshGraphs[0].Size; i++) {
             //    var node = NavigationManager.Instance.NavMeshGraphs[0].GetNode(i);
             //    node.NodeIndex = i;
             //}
 
-
             aStarPathfinding =
-                new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
+                new AStarPathfinding(navMesh, new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
             nodeArrayPathFinding =
-                new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic());
+                new NodeArrayAStarPathFinding(navMesh, new EuclidianHeuristic());
             goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
             //Debug.Log("Node 0: " + goalBoundTable.table[0]);
             goalBoundingPathfinding =
-                new GoalBoundingPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic(), goalBoundTable);
-            this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], goalBoundingPathfinding);
+                new GoalBoundingPathfinding(navMesh, new EuclidianHeuristic(), goalBoundTable);
+            this.Initialize(navMesh, goalBoundingPathfinding);
         }
 
 
@@ -286,7 +287,7 @@ namespace Assets.Scripts {
 
             if (Input.GetKeyDown(KeyCode.H)) {
                 draw = true;
-                var StartNode = NavigationManager.Instance.NavMeshGraphs[0].QuantizeToNode(this.startPosition, 1.0f);
+                var StartNode = navMesh.QuantizeToNode(this.startPosition, 1.0f);
                 //if it is not possible to quantize the positions and find the corresponding nodes, then we cannot proceed
                 if (StartNode == null) return;
 
@@ -303,7 +304,7 @@ namespace Assets.Scripts {
             }
             if (Input.GetKeyDown(KeyCode.J)) {
                 draw = true;
-                var StartNode = NavigationManager.Instance.NavMeshGraphs[0].QuantizeToNode(this.endPosition, 1.0f);
+                var StartNode = navMesh.QuantizeToNode(this.endPosition, 1.0f);
                 //if it is not possible to quantize the positions and find the corresponding nodes, then we cannot proceed
                 if (StartNode == null) return;
 
@@ -356,9 +357,9 @@ namespace Assets.Scripts {
 
 
 
-            var rightSideText = "TotalMeshNodes:" + NavigationManager.Instance.NavMeshGraphs[0].Size
-                            + "\nVisitedNodes: " + this.PathFinding.Closed.All().Count + " (" + (((this.PathFinding.Closed.All().Count * 1.0f) / NavigationManager.Instance.NavMeshGraphs[0].Size) * 100) + "%)"
-                            + "\nVisited + Open: " + (this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count) * 1.0f) / NavigationManager.Instance.NavMeshGraphs[0].Size) * 100) + "%)"
+            var rightSideText = "TotalMeshNodes:" + navMesh.Size
+                            + "\nVisitedNodes: " + this.PathFinding.Closed.All().Count + " (" + (((this.PathFinding.Closed.All().Count * 1.0f) / navMesh.Size) * 100) + "%)"
+                            + "\nVisited + Open: " + (this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count) * 1.0f) / navMesh.Size) * 100) + "%)"
                             + "\n";
 
             if (this.currentSolution != null) {
@@ -497,7 +498,7 @@ namespace Assets.Scripts {
                     }
                 }
                 Gizmos.color = Color.black;
-                //Gizmos.DrawSphere(mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(mapFloodingAlgorithm.StartNode).node.LocalPosition, 0.5f);
+                Gizmos.DrawSphere(mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(mapFloodingAlgorithm.StartNode).node.LocalPosition, 0.5f);
 
 
                 var nrOfPoints = 0;
@@ -535,8 +536,16 @@ namespace Assets.Scripts {
 
                 //var lista = (this.PathFinding as GoalBoundingPathfinding).GetNodesHack(navMesh);
                 //foreach(var node in lista) { 
+
+                List<int> lista = new List<int>();
+
                 for (int index = 0; index < navMesh.Size; index++) {
                     var node = navMesh.GetNode(index);
+
+                    if (index != node.NodeIndex) {
+                        Debug.Log("Index: " + index + " NodeIndex: " + node.NodeIndex);
+                    }
+
                     if (goalBoundTable.table[index] != null || reallyDrawAllNodes) {
                         Gizmos.color = Color.cyan;
                         Gizmos.DrawSphere(node.LocalPosition, 0.4f);
@@ -544,11 +553,14 @@ namespace Assets.Scripts {
                         Gizmos.color = Color.yellow;
                         Gizmos.DrawSphere(node.LocalPosition, 1.5f);
                     } else if (goalBoundTable.table[index] == null && (node is NavMeshEdge)) {
+                        lista.Add(index);
+
                         Gizmos.color = Color.black;
                         Gizmos.DrawSphere(node.LocalPosition, 1.5f);
                     }
 
                 }
+                int cenas = 2;
             }
             
         }

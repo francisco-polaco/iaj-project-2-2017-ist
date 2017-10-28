@@ -34,8 +34,8 @@ namespace Assets.Resources.Editor
             //calculate goal bounds for each edge
             for (int i=0; i < nodes.Count; i++)
             {
-                if(nodes[i] is NavMeshEdge)
-                {
+                //if(nodes[i] is NavMeshEdge)
+                //{
                     //initialize the GoalBounds structure for the edge
                     auxGoalBounds = ScriptableObject.CreateInstance<NodeGoalBounds>();
                     auxGoalBounds.connectionBounds = new Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding.Bounds[nodes[i].OutEdgeCount];
@@ -55,8 +55,9 @@ namespace Assets.Resources.Editor
                     dijkstra.Search(nodes[i], auxGoalBounds);
 
                     goalBoundingTable.table[i] = auxGoalBounds;
+
                     //edgeIndex++;
-                }
+                //}
             }
         
             //saving the assets, this takes forever using Unity's serialization mechanism
