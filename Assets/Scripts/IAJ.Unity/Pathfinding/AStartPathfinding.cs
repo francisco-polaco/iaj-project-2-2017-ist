@@ -28,12 +28,14 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
         public NavigationGraphNode StartNode { get; protected set; }
         public Vector3 StartPosition { get; protected set; }
         public Vector3 GoalPosition { get; protected set; }
+        public bool LiveCalculation { get; set; }
 
 
         public int DiscardedEdges { get; protected set; }
+        public int NullTableNodesCount { get; protected set; }
 
         //PASS TO GOALBOUNDSPATHFINDING
-        
+
 
         public virtual string AlgorithmName {
             get {
@@ -55,6 +57,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
 
 
             this.DiscardedEdges = 0;
+            this.NullTableNodesCount = 0;
         }
 
         public virtual void InitializePathfindingSearch(Vector3 startPosition, Vector3 goalPosition)
@@ -134,7 +137,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             uint count = 0;
             while (Open.CountOpen() > 0)
             {
-                Debug.Log("Open countzzzzz: " + Open.CountOpen());
+                //Debug.Log("Open countzzzzz: " + Open.CountOpen());
 
                 var bestNode = Open.GetBestAndRemove();
                 count++;
@@ -143,23 +146,16 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                     InProgress = false;
                     solution = CalculateSolution(bestNode, false);
                     UpdateInfo(initialFrameTime);
-
+                    CleanUp();
 
                     if (DiscardedEdges != 0)
                     {
                         Debug.Log("Discarded: " + DiscardedEdges);
                     }
-                    else
-                    {
-                        Debug.Log("Estou tao na merda");
-                    }
                     return true;
                 }
                 Closed.AddToClosed(bestNode);
                 var outConnections = bestNode.node.OutEdgeCount;
-
-                //TODO DELETE
-
                 
 
                 for (int i = 0; i < outConnections; i++)
@@ -177,7 +173,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                     return false;
                 }
             }
-            Debug.Log("Open countxxxxxx: " + Open.CountOpen());
 
             UpdateInfo(initialFrameTime);
             InProgress = false;

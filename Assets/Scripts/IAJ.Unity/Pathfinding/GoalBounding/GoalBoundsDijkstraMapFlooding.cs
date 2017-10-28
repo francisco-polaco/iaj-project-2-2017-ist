@@ -47,11 +47,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         public void Search(NavigationGraphNode startNode, NodeGoalBounds nodeGoalBounds)
         {
-            //this.Open.Initialize();
-            //this.Closed.Initialize();
-            this.NodeRecordArray = new NodeRecordArray(this.GetNodesHack(this.NavMeshGraph));
-            this.Open = this.NodeRecordArray;
-            this.Closed = this.NodeRecordArray;
+            this.Open.Initialize();
+            this.Closed.Initialize();
+            //this.NodeRecordArray = new NodeRecordArray(this.GetNodesHack(this.NavMeshGraph));
+            //this.Open = this.NodeRecordArray;
+            //this.Closed = this.NodeRecordArray;
             //this.Open.Initialize();
             //this.Closed.Initialize();
 
@@ -70,7 +70,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
             var outConnectionsStart = startNodeRecord.node.OutEdgeCount;
             //nodeGoalBounds.connectionBounds = new Bounds[outConnectionsStart];
-            UnityEngine.Debug.Log("xDzinho: " + outConnectionsStart);
+            UnityEngine.Debug.Log("LiveCalculation_ Inicial Number Childs: " + outConnectionsStart);
             for (int i = 0; i < outConnectionsStart; i++)
             {
                 //UnityEngine.Debug.Log("i: " + i);

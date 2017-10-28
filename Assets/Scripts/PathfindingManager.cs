@@ -61,6 +61,7 @@ namespace Assets.Scripts {
         private PathSmoothing pathSmoothing = new PathSmoothing();
         private AStarPathfinding aStarPathfinding;
         private NodeArrayAStarPathFinding nodeArrayPathFinding;
+        private GoalBoundingTable goalBoundTable;
         private GoalBoundingPathfinding goalBoundingPathfinding;
         private readonly KeyCode NormalAStarKeyStart = KeyCode.A;
         private readonly KeyCode NodeArrayKeyStart = KeyCode.N;
@@ -94,6 +95,12 @@ namespace Assets.Scripts {
                                             new Color(0f/255f, 0f/255f, 0         ),
                                             new Color(128f/255f, 128f/255f, 128f/255f)   
                         };
+        private bool reallyDrawAllNodes = true;
+        private KeyCode reallyDrawAllNodesKey = KeyCode.Comma;
+        private KeyCode liveCalculationKey = KeyCode.F8;
+        private bool liveCalculation = false;
+
+
         //Olive
         //Red
         //Green
@@ -137,13 +144,18 @@ namespace Assets.Scripts {
         void Awake() {
             this.currentClickNumber = 1;
             mapFloodingAlgorithm = new GoalBoundsDijkstraMapFlooding(NavigationManager.Instance.NavMeshGraphs[0]);
+            //for(int i = 0; i < NavigationManager.Instance.NavMeshGraphs[0].Size; i++) {
+            //    var node = NavigationManager.Instance.NavMeshGraphs[0].GetNode(i);
+            //    node.NodeIndex = i;
+            //}
+
 
             aStarPathfinding =
                 new AStarPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
             nodeArrayPathFinding =
                 new NodeArrayAStarPathFinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic());
-            var goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
-            Debug.Log("Node 0: " + goalBoundTable.table[0]);
+            goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
+            //Debug.Log("Node 0: " + goalBoundTable.table[0]);
             goalBoundingPathfinding =
                 new GoalBoundingPathfinding(NavigationManager.Instance.NavMeshGraphs[0], new EuclidianHeuristic(), goalBoundTable);
             this.Initialize(NavigationManager.Instance.NavMeshGraphs[0], goalBoundingPathfinding);
@@ -244,10 +256,17 @@ namespace Assets.Scripts {
                 drawBounds = !drawBounds;
             } else if (Input.GetKeyDown(drawDirectChildrenKey)){
                 drawDirectChildren = !drawDirectChildren;
-            } else if (Input.GetKeyDown(drawAllNodesOfBoundsKey)){
+            } else if (Input.GetKeyDown(drawAllNodesOfBoundsKey)) {
                 drawAllNodesOfBounds = !drawAllNodesOfBounds;
+            } else if (Input.GetKeyDown(reallyDrawAllNodesKey)) {
+                reallyDrawAllNodes = !reallyDrawAllNodes;
+            } else if (Input.GetKeyDown(liveCalculationKey)) {
+                liveCalculation = !liveCalculation;
+                this.PathFinding.LiveCalculation = liveCalculation;
             }
-           
+
+
+
 
             //call the pathfinding method if the user specified a new goal
             if (this.PathFinding.InProgress) {
@@ -327,6 +346,7 @@ namespace Assets.Scripts {
                                     + "\n  Bounds Limits: "  +drawBoundsKey           + " : " + drawBounds
                                     + "\n  DirectChildren: " +drawDirectChildrenKey   + " : " + drawDirectChildren
                                     + "\n  All nodes: "      +drawAllNodesOfBoundsKey + " : " + drawAllNodesOfBounds
+                                    + "\n  Live Calculation: "+liveCalculationKey     + " : " + liveCalculation
                                     
                 ;
             guiStyle.normal.textColor = Color.black;
@@ -336,6 +356,10 @@ namespace Assets.Scripts {
 
 
 
+            var rightSideText = "TotalMeshNodes:" + NavigationManager.Instance.NavMeshGraphs[0].Size
+                            + "\nVisitedNodes: " + this.PathFinding.Closed.All().Count + " (" + (((this.PathFinding.Closed.All().Count * 1.0f) / NavigationManager.Instance.NavMeshGraphs[0].Size) * 100) + "%)"
+                            + "\nVisited + Open: " + (this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count) * 1.0f) / NavigationManager.Instance.NavMeshGraphs[0].Size) * 100) + "%)"
+                            + "\n";
 
             if (this.currentSolution != null) {
                 var time = this.PathFinding.TotalProcessingTime * 1000;
@@ -363,18 +387,18 @@ namespace Assets.Scripts {
             }
             GUI.Label(new Rect(10, 40, 300, 250), alwaysOnText, guiStyle);
 
-            var rightSideText = "TotalMeshNodes:" + NavigationManager.Instance.NavMeshGraphs[0].Size
-                             + "\nVisitedNodes: " + this.PathFinding.Closed.All().Count + " (" + (((this.PathFinding.Closed.All().Count * 1.0f) / NavigationManager.Instance.NavMeshGraphs[0].Size ) * 100) + "%)"
-                             + "\nVisited + Open: " + (this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count) * 1.0f) / NavigationManager.Instance.NavMeshGraphs[0].Size) * 100) + "%)"
-                             + "\n";
+           
 
 
             var goalBoundPathFinding = this.PathFinding as GoalBoundingPathfinding;
             if(goalBoundingPathfinding != null) {
                 rightSideText += "\nConsidered Nodes: " + goalBoundingPathfinding.TotalEdges
                                    + "\nVisited Edges: " + (goalBoundingPathfinding.TotalEdges - goalBoundingPathfinding.DiscardedEdges)
-                                   + "\nDiscarded Edges: " + goalBoundingPathfinding.DiscardedEdges + " ( " + Mathf.Floor((goalBoundingPathfinding.DiscardedEdges * 1.0f) / (goalBoundingPathfinding.TotalEdges * 1.0f) * 100) + "% )";
-                                   
+                                   + "\nDiscarded Edges: " + goalBoundingPathfinding.DiscardedEdges + " ( " + Mathf.Floor((goalBoundingPathfinding.DiscardedEdges * 1.0f) / (goalBoundingPathfinding.TotalEdges * 1.0f) * 100) + "% )"
+                                   + "\nNullNodes: " + goalBoundingPathfinding.NullTableNodesCount;
+
+
+
 
 
 
@@ -473,7 +497,7 @@ namespace Assets.Scripts {
                     }
                 }
                 Gizmos.color = Color.black;
-                Gizmos.DrawSphere(mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(mapFloodingAlgorithm.StartNode).node.LocalPosition, 0.5f);
+                //Gizmos.DrawSphere(mapFloodingAlgorithm.NodeRecordArray.GetNodeRecord(mapFloodingAlgorithm.StartNode).node.LocalPosition, 0.5f);
 
 
                 var nrOfPoints = 0;
@@ -508,10 +532,22 @@ namespace Assets.Scripts {
             }
             if (this.drawNavMesh) {
                 var navMesh = this.PathFinding.NavMeshGraph;
-                Gizmos.color = Color.cyan;
+
+                //var lista = (this.PathFinding as GoalBoundingPathfinding).GetNodesHack(navMesh);
+                //foreach(var node in lista) { 
                 for (int index = 0; index < navMesh.Size; index++) {
                     var node = navMesh.GetNode(index);
-                    Gizmos.DrawSphere(node.LocalPosition, 0.4f);
+                    if (goalBoundTable.table[index] != null || reallyDrawAllNodes) {
+                        Gizmos.color = Color.cyan;
+                        Gizmos.DrawSphere(node.LocalPosition, 0.4f);
+                    } else if (goalBoundTable.table[index] == null && !(node is NavMeshEdge)) {
+                        Gizmos.color = Color.yellow;
+                        Gizmos.DrawSphere(node.LocalPosition, 1.5f);
+                    } else if (goalBoundTable.table[index] == null && (node is NavMeshEdge)) {
+                        Gizmos.color = Color.black;
+                        Gizmos.DrawSphere(node.LocalPosition, 1.5f);
+                    }
+
                 }
             }
             
@@ -548,6 +584,7 @@ namespace Assets.Scripts {
             this.currentSolution = null;
             this.draw = true;
             numberOfSteps = 0;
+            this.PathFinding.LiveCalculation = liveCalculation;
             this.PathFinding.InitializePathfindingSearch(this.startPosition, this.endPosition);
         }
     }

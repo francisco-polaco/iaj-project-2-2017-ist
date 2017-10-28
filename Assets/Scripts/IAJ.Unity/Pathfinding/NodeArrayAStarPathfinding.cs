@@ -81,7 +81,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             childNode.parent = bestNode;
         }
 
-        private List<NavigationGraphNode> GetNodesHack(NavMeshPathGraph graph)
+        public List<NavigationGraphNode> GetNodesHack(NavMeshPathGraph graph)
         {
             //this hack is needed because in order to implement NodeArrayA* you need to have full acess to all the nodes in the navigation graph in the beginning of the search
             //unfortunately in RAINNavigationGraph class the field which contains the full List of Nodes is private

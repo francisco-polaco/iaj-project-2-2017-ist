@@ -33,6 +33,8 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
 
         public GoalBoundingPathfinding(NavMeshPathGraph graph, IHeuristic heuristic, GoalBoundingTable goalBoundsTable) : base(graph, heuristic)
         {
+
+            this.LiveCalculation = false;
             this.GoalBoundingTable = goalBoundsTable;
             digjstra = new GoalBoundsDijkstraMapFlooding(graph);
 
@@ -41,11 +43,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
         public override void InitializePathfindingSearch(Vector3 startPosition, Vector3 goalPosition) {
             this.DiscardedEdges = 0;
             this.TotalEdges = 0;
+            this.NullTableNodesCount = 0;
             base.InitializePathfindingSearch(startPosition, goalPosition);
         }
 
-        protected override void ProcessChildNode(NodeRecord parentNode, NavigationGraphEdge connectionEdge, int edgeIndex)
-        {
+        protected override void ProcessChildNode(NodeRecord parentNode, NavigationGraphEdge connectionEdge, int edgeIndex) {
             //TODO: Implement this method for the GoalBoundingPathfinding to Work. 
             // If you implemented the NodeArrayAStar properly, you wont need to change the search method.
             //var childNode = connectionEdge.ToNode;
@@ -62,34 +64,64 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             var childNode = connectionEdge.ToNode;
             var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
 
+            //perhaps do the dikstra on the fly?
+            if (this.StartNode.Equals(parentNode.node)) {
+                base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
+                return;
+            }
+
             if (this.GoalNode.Equals(childNodeRecord.node)) {
                 base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
                 return;
             }
 
-            NodeGoalBounds ngb = (NodeGoalBounds)ScriptableObject.CreateInstance(typeof(NodeGoalBounds));
-            var outConnectionsStart = parentNode.node.OutEdgeCount;
-            ngb.connectionBounds = new DataStructures.GoalBounding.Bounds[outConnectionsStart];
-            for (int i = 0; i < ngb.connectionBounds.Length; i++) {
-                ngb.connectionBounds[i] = (DataStructures.GoalBounding.Bounds)ScriptableObject.CreateInstance(typeof(DataStructures.GoalBounding.Bounds));
-            }
-            digjstra.Search(parentNode.node, ngb);
-            toPrintNodeGoulBounds = ngb;
+            var computedLive = false;
 
-            Debug.Log(edgeIndex);
-            Debug.Log("x min:"+toPrintNodeGoulBounds.connectionBounds[edgeIndex].minx + " x max:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxx+ " z min:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].minz + " z max:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxz);
-            Debug.Log("GoalPosition: " + GoalPosition);
-            Debug.Log("Goal in Bound:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition));
-            if (toPrintNodeGoulBounds.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition))
-            {
+            if (!LiveCalculation) {
+                toPrintNodeGoulBounds = GoalBoundingTable.table[parentNode.node.NodeIndex];
+                if (toPrintNodeGoulBounds == null) {
+                    if (!(parentNode.node is NavMeshEdge)) {
+                        Debug.Log("Parent is not NavMeshEdge");
+                    }
+                    Debug.Log("NULL BOY on: " + parentNode.node.NodeIndex);
+                    //base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
+                    NullTableNodesCount++;
+                }
+            }
+            if (LiveCalculation || toPrintNodeGoulBounds == null) {
+                computedLive = true;
+                NodeGoalBounds ngb = (NodeGoalBounds)ScriptableObject.CreateInstance(typeof(NodeGoalBounds));
+                var outConnectionsStart = parentNode.node.OutEdgeCount;
+                ngb.connectionBounds = new DataStructures.GoalBounding.Bounds[outConnectionsStart];
+                for (int i = 0; i < ngb.connectionBounds.Length; i++) {
+                    ngb.connectionBounds[i] = (DataStructures.GoalBounding.Bounds)ScriptableObject.CreateInstance(typeof(DataStructures.GoalBounding.Bounds));
+                }
+                digjstra.Search(parentNode.node, ngb);
+                toPrintNodeGoulBounds = ngb;
+
+            }
+            //var varToPrintNodeGoulBounds = toPrintNodeGoulBounds;
+            ////TODO DELETE JUST WANT TO SEE PRINTED XXX
+            //if(edgeIndex >= varToPrintNodeGoulBounds.connectionBounds.Length) {
+
+            //    return;
+            //    //base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
+            //    //return;
+            //}
+            Debug.Log("ComputedLive: " + computedLive);
+            Debug.Log("Index:" + edgeIndex + " x:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].minx + " > " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxx 
+                + " z: " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].minz + " > " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxz 
+                + " :GoalPosition: " + GoalPosition + " insideBound?:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition));
+            if (toPrintNodeGoulBounds.connectionBounds[edgeIndex].PositionInsideBounds(GoalPosition)) {
                 base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
-                       return;
+                return;
             }
             //if (GoalBoundingTable.table[parentNode.node.NodeIndex].connectionBounds[edgeIndex].PositionInsideBounds(childNodeRecord.node.LocalPosition)){
             //       base.ProcessChildNode(parentNode,connectionEdge,edgeIndex);
             //       return;
             //}
             DiscardedEdges++;
+
 
             //var childNodeStatus = childNodeRecord.status;
             //float g = bestNode.gValue + (childNode.LocalPosition - bestNode.node.LocalPosition).magnitude;
