@@ -57,7 +57,7 @@
 %\titlebanner{banner above paper title}        % These are ignored unless
 %\preprintfooter{short description of paper}   % 'preprint' option specified.
 
-\title{Title Text}
+\title{Efficient and Smoothed Pathfinding - Report}
 \subtitle{IAJ Group Number: 22}
 
 \authorinfo{Miguel Amaral - 78865, Tiago Vicente - 79620, Francisco Santos - 79719}
@@ -67,7 +67,7 @@
 \maketitle
 
 \begin{abstract}
-This is the text of the abstract.
+In games we often want to find paths from one location to another. In this project, we experimented and evaluated several algorithms used, in the video game industry, to deal with this problem, which is known as Pathfinding.
 \end{abstract}
 
 % general terms are not compulsory anymore, 
@@ -76,13 +76,15 @@ This is the text of the abstract.
 %term1, term2
 
 %\keywords
-%keyword1, keyword2
+%pathfinding, video games, Artificial Intelligence in Games
 
 \section{Introduction}
 
-Intro
+Pathfinding is a common problem in video games that consists in finding a good path from a starting point to a goal point avoiding obstacles and minimizing costs. For instance, in a RTS, like Starcraft, if the player has a unit selected and finds an objective that he wants to attack, the game has to calculate the shortest path to it, avoiding possible structures already built.
 
-The structure of the report is as follows: Section \ref{decisions} presents the main implementation decisions in the different project topics. Section \ref{optimi} provides information about the optimizations done in the project and their evaluation. Finally, in section \ref{conclusion} we conclude.
+In our work, we face the problem of finding said path in a dungeon, which in video games is a huge area, typically indoors, that has multiple rooms. So, we implemented and evaluated several techniques used, in the video game industry, to face this dilemma.
+
+The structure of the report is as follows: Section \ref{decisions} presents the main implementation decisions in the different project topics. Section \ref{eval} presents the evaluation of the pathfinding algorithms implemented. Section \ref{optimi} provides information about the optimizations done in the project and their evaluation. Finally, in section \ref{conclusion} we conclude.
 
 \section{Decisions}
 \label{decisions}
@@ -137,7 +139,8 @@ Lots of text.
 e text.
 
 Lots of text.
-
+\section{Evaluation}
+\label{eval}
 More text.
 
 Lots of text.
