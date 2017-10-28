@@ -155,7 +155,8 @@ namespace Assets.Scripts {
                 new AStarPathfinding(navMesh, new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
             nodeArrayPathFinding =
                 new NodeArrayAStarPathFinding(navMesh, new EuclidianHeuristic());
-            goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
+            goalBoundTable = new GoalBoundingTable();
+            goalBoundTable.LoadOptimized2();
             //Debug.Log("Node 0: " + goalBoundTable.table[0]);
             goalBoundingPathfinding =
                 new GoalBoundingPathfinding(navMesh, new EuclidianHeuristic(), goalBoundTable);

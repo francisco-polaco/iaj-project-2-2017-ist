@@ -93,13 +93,13 @@ namespace Assets.Resources.Editor
             }
             WaitHandle.WaitAll(doneEvents);
             EditorUtility.DisplayProgressBar("GoalBounding precomputation progress",
-                "Calculating goal bounds for each edge", 100);
+                "Calculating goal bounds for each edge", 1);
             Progress = 0;
 
             //saving the assets, this takes forever using Unity's serialization mechanism
             WriteTimestampToFile("End of GoalBoundsDijkstraMapFlooding");
 
-            GoalBoundingTable.SaveToAssetDatabase();
+            GoalBoundingTable.SaveToAssetDatabaseOptimized2();
             WriteTimestampToFile("End of Storing");
             EditorUtility.ClearProgressBar();
         }
@@ -171,7 +171,6 @@ namespace Assets.Resources.Editor
             int index = (int) state;
             IajMenuItemsThreaded.GoalBoundingTable.table[index] = _auxGoalBounds;
             //edgeIndex++;
-            Debug.Log("Task " + index + " completed. - " + IajMenuItemsThreaded.Progress);
             _doneEvent.Set();
         }
 
