@@ -28,7 +28,9 @@
 % 10pt          To set in 10-point type instead of 9-point.
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
+\RequirePackage[english]{babel} % Se fizerem o texto em ingles
 
+\usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{etoolbox}
 \makeatletter
@@ -56,11 +58,11 @@
 %\preprintfooter{short description of paper}   % 'preprint' option specified.
 
 \title{Title Text}
-\subtitle{IAJ Group Number: ?}
+\subtitle{IAJ Group Number: 22}
 
-\authorinfo{Name1, Name2, Name3}
-           {Affiliation}
-           {Email1,2,3}
+\authorinfo{Miguel Amaral - 78865, Tiago Vicente - 79620, Francisco Santos - 79719}
+           {Instituto Superior Técnico}
+
 
 \maketitle
 
@@ -78,37 +80,28 @@ This is the text of the abstract.
 
 \section{Introduction}
 
-The text of the paper begins here.
+Intro
 
+The structure of the report is as follows: Section \ref{decisions} presents the main implementation decisions in the different project topics. Section \ref{optimi} provides information about the optimizations done in the project and their evaluation. Finally, in section \ref{conclusion} we conclude.
+
+\section{Decisions}
+\label{decisions}
 Lots of text.
+
+\subsection{A*}
+nao sei se ha
+
+\subsection{Node Array}
 
 More text.
 
-Lots of text.
+\subsection{Goal Bounding}
+OH YEAH!!!
 
-More text.
+\subsection{Path Smoothing}
 
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
+Lots oLots of text.
+e text.
 
 Lots of text.
 
@@ -119,12 +112,7 @@ Lots of text.
 More text.
 
 Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
+e text.
 
 Lots of text.
 
@@ -135,9 +123,7 @@ Lots of text.
 More text.
 
 Lots of text.
-
-More text.
-
+e text.
 
 Lots of text.
 
@@ -147,6 +133,8 @@ Lots of text.
 
 More text.
 
+Lots of text.
+e text.
 
 Lots of text.
 
@@ -158,7 +146,14 @@ More text.
 
 Lots of text.
 
+More text.f text.
+
+
+\section{Optimizations}
+\label{optimi}
 More text.
+\subsection{Off-line Goal Bound Calculation}
+Lots of text.
 
 Lots of text.
 
@@ -173,78 +168,8 @@ Lots of text.
 More text.
 
 Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-
-
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
-More text.
-
-Lots of text.
-
+\section{Conclusion}
+\label{conclusion}
 More text.
 
 Lots of text.
