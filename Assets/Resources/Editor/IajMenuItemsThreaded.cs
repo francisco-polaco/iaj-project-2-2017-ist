@@ -21,18 +21,11 @@ namespace Assets.Resources.Editor
         public static int Progress;
         public static GoalBoundingTable GoalBoundingTable;
 
-        private static readonly int AuxThreads = SystemInfo.processorCount - 1;
+        private static readonly int AuxThreads = SystemInfo.processorCount;
 
         [MenuItem("IAJ/Calculate Goal Bounds (Threaded)")]
         private static void CalculateGoalBounds()
         {
-            // Only 1 logical core, it is better to run the non-threaded version
-            if (AuxThreads == 0)
-            {
-                IAJMenuItems.CalculateGoalBounds();
-                return;
-            } 
-
             WriteTimestampToFile("Start");
             //get the NavMeshGraph from the current scene
             NavMeshPathGraph navMesh = GameObject.Find("Navigation Mesh").GetComponent<NavMeshRig>().NavMesh.Graph;
@@ -41,7 +34,6 @@ namespace Assets.Resources.Editor
             //if this method is not called, the connections in the navigationgraph are not properly initialized
             navMesh.QuantizeToNode (new Vector3 (0, 0, 0), 1.0f);
 
-            //var dijkstra = new GoalBoundsDijkstraMapFlooding(navMesh);
 
             GoalBoundingTable = ScriptableObject.CreateInstance<GoalBoundingTable>();
             var nodes = GetNodesHack(navMesh);
@@ -93,13 +85,13 @@ namespace Assets.Resources.Editor
             }
             WaitHandle.WaitAll(doneEvents);
             EditorUtility.DisplayProgressBar("GoalBounding precomputation progress",
-                "Calculating goal bounds for each edge", 1);
+                "Calculating goal bounds for each edge", 1.0f);
             Progress = 0;
 
             //saving the assets, this takes forever using Unity's serialization mechanism
             WriteTimestampToFile("End of GoalBoundsDijkstraMapFlooding");
 
-            GoalBoundingTable.SaveToAssetDatabaseOptimized2();
+            GoalBoundingTable.SaveToAssetDatabaseOptimized();
             WriteTimestampToFile("End of Storing");
             EditorUtility.ClearProgressBar();
         }
@@ -160,8 +152,6 @@ namespace Assets.Resources.Editor
 
         public void ThreadPoolCallback(object state)
         {
-            // Debug.Log("Task " + (int) state + " started.");
-
             //run a Dijkstra mapflooding for each node
             _dijkstra.Search(_node, _auxGoalBounds);
             // progress
@@ -170,7 +160,6 @@ namespace Assets.Resources.Editor
 
             int index = (int) state;
             IajMenuItemsThreaded.GoalBoundingTable.table[index] = _auxGoalBounds;
-            //edgeIndex++;
             _doneEvent.Set();
         }
 

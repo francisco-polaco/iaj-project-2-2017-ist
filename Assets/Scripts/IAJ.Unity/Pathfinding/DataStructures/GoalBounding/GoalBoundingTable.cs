@@ -63,57 +63,13 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
             Selection.activeObject = this;
             
         }
-
+        
+        /* For the main array, store a list with a capacity equal to it's size.
+        * For each secundary array, store a list like the above, but each element it's a SerializableBounds
+        * This class is simply a container class that it's serializable by C#  serialization
+        * 
+        * */
         public void SaveToAssetDatabaseOptimized()
-        {
-
-            string assetPathAndName =
-                AssetDatabase.GenerateUniqueAssetPath(Path() + "/" + typeof(GoalBoundingTable).Name.ToString() + ".bin");
-
-            EditorUtility.DisplayProgressBar("GoalBounding precomputation progress", "Saving GoalBoundsTable to an Asset file", 0);
-
-
-            IFormatter formatter = new BinaryFormatter();
-            using (Stream stream = new FileStream(assetPathAndName, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                formatter.Serialize(stream, table.Length);
-
-                foreach (var nodeGoalBoundse in table)
-                {
-                    if (nodeGoalBoundse == null)
-                    {
-                        formatter.Serialize(stream, "null");
-                    }
-                    else
-                    {
-                        formatter.Serialize(stream, nodeGoalBoundse.connectionBounds.Length);
-
-                        foreach (var nodeGoalBound in nodeGoalBoundse.connectionBounds)
-                        {
-                            if (nodeGoalBound == null)
-                            {
-                                formatter.Serialize(stream, "null");
-                            }
-                            else
-                            {
-                                formatter.Serialize(stream, nodeGoalBound.minx);
-                                formatter.Serialize(stream, nodeGoalBound.maxx);
-                                formatter.Serialize(stream, nodeGoalBound.minz);
-                                formatter.Serialize(stream, nodeGoalBound.maxz);
-                            }
-                        }
-                    }
-                }
-            }
-
-            EditorUtility.DisplayProgressBar("GoalBounding precomputation progress", "Saving GoalBoundsTable to an Asset file", 100);
-
-            EditorUtility.FocusProjectWindow();
-            Selection.activeObject = this;
-
-        }
-
-        public void SaveToAssetDatabaseOptimized2()
         {
 
             string assetPathAndName =
@@ -164,7 +120,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
 
         }
 
-        public void LoadOptimized2()
+        public void LoadOptimized()
         {
             // We will assume a default name here
 
@@ -209,59 +165,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
             }
         }
 
-        public void LoadOptimized()
-        {
-            // We will assume a default name here
-            string assetPathAndName =
-                Path() + "/" + typeof(GoalBoundingTable).Name.ToString() + ".bin";
-
-            IFormatter formatter = new BinaryFormatter();
-            using (Stream stream = 
-                new FileStream(assetPathAndName, FileMode.Open, FileAccess.Read, FileShare.None))
-            {
-                int sizeOfTable = (int) formatter.Deserialize(stream);
-                table = new NodeGoalBounds[sizeOfTable];
-
-                for (int i = 0; i < sizeOfTable; i++)
-                {
-                    object tableValue = formatter.Deserialize(stream);
-
-                    if (tableValue.Equals("null"))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        int sizeOfBounds = (int) tableValue;
-                        table[i] = new NodeGoalBounds(sizeOfBounds);
-                        for (int j = 0; j < sizeOfBounds; j++)
-                        {
-                            object boundValue = formatter.Deserialize(stream);
-                            if (boundValue.Equals("null"))
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                float minx = (float) boundValue;
-                                float maxx = (float) formatter.Deserialize(stream);
-                                float minz = (float) formatter.Deserialize(stream);
-                                float maxz = (float) formatter.Deserialize(stream);
-
-                                var bounds = new Bounds();
-                                bounds.minx = minx;
-                                bounds.maxx = maxx;
-                                bounds.minz = minz;
-                                bounds.maxz = maxz;
-
-                                table[i].connectionBounds[j] = bounds;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         private static string Path()
         {
             string path = AssetDatabase.GetAssetPath(Selection.activeObject);
@@ -301,9 +204,6 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
                 this.maxz = 0f;
             }
         }
-        /* Para o array principal guardar o seu tamaanho
-         * para cada array secundario, guardar o seu tamanho e os 4 floats de cada objecto
-         * se em algum sitio houver um null a string "null" será escrita
-         * */
+       
     }
 }
