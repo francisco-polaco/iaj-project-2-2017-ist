@@ -26,6 +26,13 @@ namespace Assets.Resources.Editor
         [MenuItem("IAJ/Calculate Goal Bounds (Threaded)")]
         private static void CalculateGoalBounds()
         {
+            // Only 1 logical core, it is better to run the non-threaded version
+            if (AuxThreads == 0)
+            {
+                IAJMenuItems.CalculateGoalBounds();
+                return;
+            } 
+
             WriteTimestampToFile("Start");
             //get the NavMeshGraph from the current scene
             NavMeshPathGraph navMesh = GameObject.Find("Navigation Mesh").GetComponent<NavMeshRig>().NavMesh.Graph;
@@ -88,16 +95,18 @@ namespace Assets.Resources.Editor
             EditorUtility.DisplayProgressBar("GoalBounding precomputation progress",
                 "Calculating goal bounds for each edge", 100);
             Progress = 0;
-            
+
             //saving the assets, this takes forever using Unity's serialization mechanism
+            WriteTimestampToFile("End of GoalBoundsDijkstraMapFlooding");
+
             GoalBoundingTable.SaveToAssetDatabase();
-            WriteTimestampToFile("End");
+            WriteTimestampToFile("End of Storing");
             EditorUtility.ClearProgressBar();
         }
 
-        private static void WriteTimestampToFile(string tag, bool clearFile = false)
+        public static void WriteTimestampToFile(string tag, string filename = "threaded.txt", bool clearFile = false)
         {
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\time.txt";
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + @"\" + filename;
             if (File.Exists(path))
             {
                 if (clearFile)
