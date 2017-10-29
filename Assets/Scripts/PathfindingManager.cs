@@ -9,6 +9,7 @@ using RAIN.Navigation.NavMesh;
 using System.Collections.Generic;
 using UnityEngine;
 using Bounds = Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding.Bounds;
+using System;
 
 namespace Assets.Scripts {
     public class PathfindingManager : MonoBehaviour {
@@ -100,6 +101,7 @@ namespace Assets.Scripts {
         private KeyCode reallyDrawAllNodesKey = KeyCode.Comma;
         private KeyCode liveCalculationKey = KeyCode.F8;
         private bool liveCalculation = false;
+        private int realSize;
 
 
         //Olive
@@ -146,10 +148,11 @@ namespace Assets.Scripts {
             this.currentClickNumber = 1;
             navMesh = GameObject.Find("Navigation Mesh").GetComponent<NavMeshRig>().NavMesh.Graph;
             mapFloodingAlgorithm = new GoalBoundsDijkstraMapFlooding(navMesh);
-            
+
+            calculateNavMeshSize(navMesh);
 
             aStarPathfinding =
-                new AStarPathfinding(navMesh, new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
+                new AStarPathfinding(navMesh, new NodePriorityHeap(), new HashMapNodeList(), new EuclidianHeuristic());
             nodeArrayPathFinding =
                 new NodeArrayAStarPathFinding(navMesh, new EuclidianHeuristic());
             goalBoundTable = ScriptableObject.CreateInstance<GoalBoundingTable>();
@@ -164,6 +167,17 @@ namespace Assets.Scripts {
                 new GoalBoundingPathfinding(navMesh, new EuclidianHeuristic(), goalBoundTable);
             this.Initialize(navMesh, goalBoundingPathfinding);
         }
+
+        private void calculateNavMeshSize(NavMeshPathGraph navMesh) {
+            realSize = 0;
+            for (int index = 0; index < navMesh.Size; index++) {
+                var node = navMesh.GetNode(index);
+                if(node is NavMeshEdge) {
+                    realSize++;
+                }
+            }
+        }
+
 
 
         // Update is called once per frame
@@ -360,9 +374,9 @@ namespace Assets.Scripts {
 
 
 
-            var rightSideText = "TotalMeshNodes:" + navMesh.Size
-                            + "\nVisitedNodes: " + this.PathFinding.TotalExploredNodes + " (" + (((this.PathFinding.TotalExploredNodes * 1.0f) / navMesh.Size) * 100) + "%)"
-                            + "\nVisited + Open: " + (this.PathFinding.TotalExploredNodes + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.TotalExploredNodes + this.PathFinding.Open.All().Count) * 1.0f) / navMesh.Size) * 100) + "%)"
+            var rightSideText = "TotalMeshNodes:" + navMesh.Size + " : " + realSize
+                            + "\nVisitedNodes: " + this.PathFinding.TotalExploredNodes + " (" + (((this.PathFinding.TotalExploredNodes * 1.0f) / realSize) * 100) + "%)"
+                            + "\nVisited + Open: " + (this.PathFinding.TotalExploredNodes + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.TotalExploredNodes + this.PathFinding.Open.All().Count) * 1.0f) / realSize) * 100) + "%)"
                             + "\n";
 
             if (this.currentSolution != null) {
@@ -399,15 +413,6 @@ namespace Assets.Scripts {
                                    + "\n  Visited Edges: " + (goalBoundingPathfinding.TotalEdges - goalBoundingPathfinding.DiscardedEdges)
                                    + "\n  Discarded Edges: " + goalBoundingPathfinding.DiscardedEdges + " ( " + Mathf.Floor((goalBoundingPathfinding.DiscardedEdges * 1.0f) / (goalBoundingPathfinding.TotalEdges * 1.0f) * 100) + "% )"
                                    + "\n  NullNodes: " + goalBoundingPathfinding.NullTableNodesCount;
-
-
-
-
-
-
-
-
-
             }
             GUI.Label(new Rect(Screen.currentResolution.width- 380, 40, 400, 250), rightSideText, guiStyle);
         }
@@ -448,13 +453,21 @@ namespace Assets.Scripts {
                     Gizmos.color = Color.magenta;
                     if (this.PathFinding.Open != null) {
                         foreach (var nodeRecord in this.PathFinding.Open.All()) {
-                            Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.5f);
+                            //if(!(nodeRecord.node is NavMeshEdge)) {
+                            //    Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.5f);
+                            //} else {
+                                Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.5f);
+                            //}
                         }
                     }
                     Gizmos.color = Color.blue;
                     if (this.PathFinding.Closed != null) {
                         foreach (var nodeRecord in this.PathFinding.Closed.All()) {
-                            Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.5f);
+                            //if (!(nodeRecord.node is NavMeshEdge)) {
+                            //    Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.5f);
+                            //} else {
+                                Gizmos.DrawSphere(nodeRecord.node.LocalPosition, 2.5f);
+                            //}
                         }
                     }
                 }
