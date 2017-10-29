@@ -76,9 +76,9 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             }
 
             var computedLive = false;
-
             if (!LiveCalculation) {
                 toPrintNodeGoulBounds = GoalBoundingTable.table[parentNode.node.NodeIndex];
+
                 if (toPrintNodeGoulBounds == null) {
                     if (!(parentNode.node is NavMeshEdge)) {
                         Debug.Log("Parent is not NavMeshEdge");

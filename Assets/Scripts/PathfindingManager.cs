@@ -146,20 +146,19 @@ namespace Assets.Scripts {
             this.currentClickNumber = 1;
             navMesh = GameObject.Find("Navigation Mesh").GetComponent<NavMeshRig>().NavMesh.Graph;
             mapFloodingAlgorithm = new GoalBoundsDijkstraMapFlooding(navMesh);
-            //for(int i = 0; i < NavigationManager.Instance.NavMeshGraphs[0].Size; i++) {
-            //    var node = NavigationManager.Instance.NavMeshGraphs[0].GetNode(i);
-            //    node.NodeIndex = i;
-            //}
+            
 
             aStarPathfinding =
                 new AStarPathfinding(navMesh, new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
             nodeArrayPathFinding =
                 new NodeArrayAStarPathFinding(navMesh, new EuclidianHeuristic());
-            goalBoundTable = new GoalBoundingTable();
-            var startTime = System.DateTime.Now;
-            goalBoundTable.LoadOptimized();
-            Debug.Log("GoalBoundTable loading time: " + (System.DateTime.Now - startTime).Milliseconds +" ms");
-            //Debug.Log("Node 0: " + goalBoundTable.table[0]);
+            //goalBoundTable = ScriptableObject.CreateInstance<GoalBoundingTable>();
+            //var startTime = System.DateTime.Now;
+            //goalBoundTable.LoadOptimized();
+            //Debug.Log("GoalBoundTable loading time: " + (System.DateTime.Now - startTime).Milliseconds +" ms");
+
+            goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
+
             goalBoundingPathfinding =
                 new GoalBoundingPathfinding(navMesh, new EuclidianHeuristic(), goalBoundTable);
             this.Initialize(navMesh, goalBoundingPathfinding);
@@ -510,6 +509,10 @@ namespace Assets.Scripts {
                 string boxes = "";
                 if (this.drawBounds) {
                     foreach (var bound in boundsInformationContainer) {
+                        if (bound == null)
+                        {
+                            Debug.Log("NULL bound" + index);
+                        }
                         if (index >= c.Length) {
                             colorrrr = Color.black;
                         } else {
