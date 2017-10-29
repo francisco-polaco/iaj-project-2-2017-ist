@@ -155,7 +155,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
                         else
                         {
                             NodeGoalBounds ngbInstance = ScriptableObject.CreateInstance<NodeGoalBounds>();
-                            ngbInstance.Init(table.Length);
+                            ngbInstance.Init(matrix[i].Count);
                             table[i] = ngbInstance;
                             for (int j = 0; j < matrix[i].Count; j++)
                             {

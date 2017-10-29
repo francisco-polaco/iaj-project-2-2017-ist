@@ -157,6 +157,7 @@ namespace Assets.Scripts {
             goalBoundTable.LoadOptimized();
             Debug.Log("GoalBoundTable loading time: " + (System.DateTime.Now - startTime).Milliseconds +" ms");
 
+
             //goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
             
             goalBoundingPathfinding =
