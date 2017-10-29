@@ -29,20 +29,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             var childNode = connectionEdge.ToNode;
             var childNodeRecord = this.NodeRecordArray.GetNodeRecord(childNode);
 
-            //if (childNodeRecord == null)
-            //{
-            //    //this piece of code is used just because of the special start nodes and goal nodes added to the RAIN Navigation graph when a new search is performed.
-            //    //Since these special goals were not in the original navigation graph, they will not be stored in the NodeRecordArray and we will have to add them
-            //    //to a special structure
-            //    //it's ok if you don't understand this, this is a hack and not part of the NodeArrayA* algorithm, just do NOT CHANGE THIS, or your algorithm will not work
-            //    childNodeRecord = new NodeRecord
-            //    {
-            //        node = childNode,
-            //        parent = bestNode,
-            //        status = NodeStatus.Unvisited
-            //    };
-            //    this.NodeRecordArray.AddSpecialCaseNode(childNodeRecord);
-            //}
+          
 
             var childNodeStatus = childNodeRecord.status;
             float g = bestNode.gValue + (childNode.LocalPosition - bestNode.node.LocalPosition).magnitude;
@@ -60,17 +47,10 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
             } else if (childNodeStatus == NodeStatus.Closed && childNodeRecord.fValue > f) {
                 UpdateNode(bestNode, childNodeRecord, g, h, f);
                 Closed.RemoveFromClosed(childNodeRecord);
+                TotalExploredNodes--;
                 Open.AddToOpen(childNodeRecord);
             }
-            //} else {
-            //    if(childNodeStatus == NodeStatus.Open) {
-            //        UnityEngine.Debug.Log("Open AUTISMOOOO");
-            //    }
-            //    if (childNodeStatus == NodeStatus.Closed) {
-            //        UnityEngine.Debug.Log("Close AUTISMOOOO");
-            //    }
-            //    UnityEngine.Debug.Log("Estou morto");
-            //}
+            
         }
 
         protected void UpdateNode(NodeRecord bestNode, NodeRecord childNode, float g, float h, float f)

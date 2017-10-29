@@ -125,6 +125,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                 if (close.fValue > childNode.fValue)
                 {
                     Closed.RemoveFromClosed(close);
+                    TotalExploredNodes--;
                     Open.AddToOpen(childNode);
                 }
             }
@@ -150,6 +151,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
                     return true;
                 }
                 Closed.AddToClosed(bestNode);
+                TotalExploredNodes++;
                 var outConnections = bestNode.node.OutEdgeCount;
                 
 
@@ -181,10 +183,11 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding
         {
             PartialTime = Time.realtimeSinceStartup - initialFrameTime;
             TotalProcessingTime += PartialTime;
-            TotalExploredNodes = (uint) Closed.All().Count;
-            if (Open.CountOpen() > MaxOpenNodes)
+            //TotalExploredNodes = (uint) Closed.All().Count;
+            var count = Open.CountOpen();
+            if (count > MaxOpenNodes)
             {
-                MaxOpenNodes = Open.CountOpen();
+                MaxOpenNodes = count;
             }
             PureTotalTime = Time.realtimeSinceStartup - BegginingOfSearchRealTime;
         }
