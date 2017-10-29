@@ -17,5 +17,10 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
         {
             connectionBounds = new Bounds[size];
         }
+
+        public void Init(int size)
+        {
+            connectionBounds = new Bounds[size];
+        }
     }
 }

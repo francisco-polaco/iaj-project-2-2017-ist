@@ -19,6 +19,14 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
             this.InitializeBounds(position);
         }
 
+        public void Init(float minx, float maxx, float minz, float maxz)
+        {
+            this.minx = minx;
+            this.maxx = maxx;
+            this.minz = minz;
+            this.maxz = maxz;
+        }
+
         public void InitializeBounds(Vector3 position)
         {
             this.minx = position.x;

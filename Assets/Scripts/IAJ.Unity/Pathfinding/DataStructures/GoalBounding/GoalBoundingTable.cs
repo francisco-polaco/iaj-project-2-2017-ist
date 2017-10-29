@@ -146,18 +146,16 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
                 {
                     if (matrix[i] != null)
                     {
-                        table[i] = new NodeGoalBounds(table.Length);
+                        NodeGoalBounds ngbInstance = ScriptableObject.CreateInstance<NodeGoalBounds>();
+                        ngbInstance.Init(table.Length);
+                        table[i] = ngbInstance;
                         for (int j = 0; j < matrix[i].Count; j++)
                         {
                             if (matrix[i][j] != null)
                             {
-                                var bounds = new Bounds
-                                {
-                                    minx = matrix[i][j].minx,
-                                    maxx = matrix[i][j].maxx,
-                                    minz = matrix[i][j].minz,
-                                    maxz = matrix[i][j].maxz
-                                };
+                                var bounds = ScriptableObject.CreateInstance<Bounds>();
+                                var entrie = matrix[i][j];
+                                bounds.Init(entrie.minx, entrie.maxx, entrie.minz, entrie.maxz);
                                 table[i].connectionBounds[j] = bounds;
                             }
                             else
