@@ -152,12 +152,12 @@ namespace Assets.Scripts {
                 new AStarPathfinding(navMesh, new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
             nodeArrayPathFinding =
                 new NodeArrayAStarPathFinding(navMesh, new EuclidianHeuristic());
-            //goalBoundTable = ScriptableObject.CreateInstance<GoalBoundingTable>();
-            //var startTime = System.DateTime.Now;
-            //goalBoundTable.LoadOptimized();
-            //Debug.Log("GoalBoundTable loading time: " + (System.DateTime.Now - startTime).Milliseconds +" ms");
+            goalBoundTable = ScriptableObject.CreateInstance<GoalBoundingTable>();
+            var startTime = System.DateTime.Now;
+            goalBoundTable.LoadOptimized();
+            Debug.Log("GoalBoundTable loading time: " + (System.DateTime.Now - startTime).Milliseconds +" ms");
 
-            goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
+           // goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
 
             goalBoundingPathfinding =
                 new GoalBoundingPathfinding(navMesh, new EuclidianHeuristic(), goalBoundTable);
