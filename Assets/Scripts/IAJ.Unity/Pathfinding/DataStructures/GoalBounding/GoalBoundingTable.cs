@@ -87,20 +87,29 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
                 {
                     if (table[i] != null)
                     {
-                        for (var j = 0; j < table[i].connectionBounds.Length; j++)
+                        if (table[i].connectionBounds.Length == 0)
                         {
-                            var connectionBound = table[i].connectionBounds[j];
-                            if (connectionBound != null)
+                            matrix.Insert(i, new List<SerializableBounds>(0));
+                        }
+                        else
+                        {
+                            for (var j = 0; j < table[i].connectionBounds.Length; j++)
                             {
-                                if(i == matrix.Count)
-                                    matrix.Insert(i, new List<SerializableBounds>(table[i].connectionBounds.Length));
-                                matrix[i].Insert(j, new SerializableBounds(connectionBound.minx, connectionBound.maxx,
+                                var connectionBound = table[i].connectionBounds[j];
+                                if (connectionBound != null)
+                                {
+                                    if (i >= matrix.Count)
+                                        matrix.Insert(i,
+                                            new List<SerializableBounds>(table[i].connectionBounds.Length));
+                                    matrix[i].Insert(j, new SerializableBounds(connectionBound.minx,
+                                        connectionBound.maxx,
                                         connectionBound.minz,
                                         connectionBound.maxz));
-                            }
-                            else
-                            {
-                                matrix[i].Insert(j, null);
+                                }
+                                else
+                                {
+                                    matrix[i].Insert(j, null);
+                                }
                             }
                         }
                     }
