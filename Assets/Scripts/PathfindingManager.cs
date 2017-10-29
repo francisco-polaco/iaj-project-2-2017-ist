@@ -152,13 +152,13 @@ namespace Assets.Scripts {
                 new AStarPathfinding(navMesh, new SimpleUnorderedNodeList(), new HashMapNodeList(), new EuclidianHeuristic());
             nodeArrayPathFinding =
                 new NodeArrayAStarPathFinding(navMesh, new EuclidianHeuristic());
-            //goalBoundTable = ScriptableObject.CreateInstance<GoalBoundingTable>();
-            //var startTime = System.DateTime.Now;
-            //goalBoundTable.LoadOptimized();
-            //Debug.Log("GoalBoundTable loading time: " + (System.DateTime.Now - startTime).Milliseconds +" ms");
+            goalBoundTable = ScriptableObject.CreateInstance<GoalBoundingTable>();
+            var startTime = System.DateTime.Now;
+            goalBoundTable.LoadOptimized();
+            Debug.Log("GoalBoundTable loading time: " + (System.DateTime.Now - startTime).Milliseconds +" ms");
 
-            goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
-
+            //goalBoundTable = Resources.Load<GoalBoundingTable>("GoalBoundingTable");
+            
             goalBoundingPathfinding =
                 new GoalBoundingPathfinding(navMesh, new EuclidianHeuristic(), goalBoundTable);
             this.Initialize(navMesh, goalBoundingPathfinding);
@@ -360,8 +360,8 @@ namespace Assets.Scripts {
 
 
             var rightSideText = "TotalMeshNodes:" + navMesh.Size
-                            + "\nVisitedNodes: " + this.PathFinding.Closed.All().Count + " (" + (((this.PathFinding.Closed.All().Count * 1.0f) / navMesh.Size) * 100) + "%)"
-                            + "\nVisited + Open: " + (this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.Closed.All().Count + this.PathFinding.Open.All().Count) * 1.0f) / navMesh.Size) * 100) + "%)"
+                            + "\nVisitedNodes: " + this.PathFinding.TotalExploredNodes + " (" + (((this.PathFinding.TotalExploredNodes * 1.0f) / navMesh.Size) * 100) + "%)"
+                            + "\nVisited + Open: " + (this.PathFinding.TotalExploredNodes + this.PathFinding.Open.All().Count).ToString() + " (" + ((((this.PathFinding.TotalExploredNodes + this.PathFinding.Open.All().Count) * 1.0f) / navMesh.Size) * 100) + "%)"
                             + "\n";
 
             if (this.currentSolution != null) {
@@ -374,8 +374,7 @@ namespace Assets.Scripts {
                 }
 
 
-                alwaysOnText += "\n\nNodesPerFrame: " + NodesPerFrame
-                           + "\nNodes Visited: " + this.PathFinding.TotalExploredNodes
+                rightSideText += "\n\nNodesPerFrame: " + NodesPerFrame
                            + "\nMaximum Open Size: " + this.PathFinding.MaxOpenNodes
                            + "\nCurrent Open Size: " + this.PathFinding.Open.All().Count 
                            + "\nProcessing time (ms): " + time.ToString("F")
@@ -394,11 +393,11 @@ namespace Assets.Scripts {
 
 
             var goalBoundPathFinding = this.PathFinding as GoalBoundingPathfinding;
-            if(goalBoundingPathfinding != null) {
-                rightSideText += "\nConsidered Nodes: " + goalBoundingPathfinding.TotalEdges
-                                   + "\nVisited Edges: " + (goalBoundingPathfinding.TotalEdges - goalBoundingPathfinding.DiscardedEdges)
-                                   + "\nDiscarded Edges: " + goalBoundingPathfinding.DiscardedEdges + " ( " + Mathf.Floor((goalBoundingPathfinding.DiscardedEdges * 1.0f) / (goalBoundingPathfinding.TotalEdges * 1.0f) * 100) + "% )"
-                                   + "\nNullNodes: " + goalBoundingPathfinding.NullTableNodesCount;
+            if(goalBoundPathFinding != null) {
+                rightSideText += "\n\nGoulBounding stats\n  Considered Edges: " + goalBoundingPathfinding.TotalEdges
+                                   + "\n  Visited Edges: " + (goalBoundingPathfinding.TotalEdges - goalBoundingPathfinding.DiscardedEdges)
+                                   + "\n  Discarded Edges: " + goalBoundingPathfinding.DiscardedEdges + " ( " + Mathf.Floor((goalBoundingPathfinding.DiscardedEdges * 1.0f) / (goalBoundingPathfinding.TotalEdges * 1.0f) * 100) + "% )"
+                                   + "\n  NullNodes: " + goalBoundingPathfinding.NullTableNodesCount;
 
 
 

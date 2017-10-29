@@ -90,7 +90,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
             }
             //for debug purposes
             digjstra.StartNode = parentNode.node;
-            if (LiveCalculation || toPrintNodeGoulBounds == null) {
+            if (LiveCalculation) {
                 computedLive = true;
                 NodeGoalBounds ngb = (NodeGoalBounds)ScriptableObject.CreateInstance(typeof(NodeGoalBounds));
                 var outConnectionsStart = parentNode.node.OutEdgeCount;
@@ -101,14 +101,14 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 digjstra.Search(parentNode.node, ngb);
                 toPrintNodeGoulBounds = ngb;
 
+            } else if (toPrintNodeGoulBounds == null){
+                //null entries on table are processed as normal A*
+                base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
+                return;
             }
             var varToPrintNodeGoulBounds = toPrintNodeGoulBounds;
-            ////TODO DELETE JUST WANT TO SEE PRINTED XXX
             if(edgeIndex >= varToPrintNodeGoulBounds.connectionBounds.Length) {
                 Debug.Log("Why You DO this to me");
-            //    return;
-            //    //base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
-            //    //return;
             }
             //Debug.Log("ComputedLive: " + computedLive);
             //Debug.Log("Index:" + edgeIndex + " x:" + toPrintNodeGoulBounds.connectionBounds[edgeIndex].minx + " > " + toPrintNodeGoulBounds.connectionBounds[edgeIndex].maxx 
@@ -118,31 +118,7 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.GoalBounding
                 base.ProcessChildNode(parentNode, connectionEdge, edgeIndex);
                 return;
             }
-            //if (GoalBoundingTable.table[parentNode.node.NodeIndex].connectionBounds[edgeIndex].PositionInsideBounds(childNodeRecord.node.LocalPosition)){
-            //       base.ProcessChildNode(parentNode,connectionEdge,edgeIndex);
-            //       return;
-            //}
             DiscardedEdges++;
-
-
-            //var childNodeStatus = childNodeRecord.status;
-            //float g = bestNode.gValue + (childNode.LocalPosition - bestNode.node.LocalPosition).magnitude;
-            //float h = this.Heuristic.H(childNode, this.GoalNode);
-            //float f = F(g, h);
-
-            ////We can only update inside the ifs because otherwise we might be making the node worse
-
-            //if (childNodeStatus == NodeStatus.Unvisited) {
-            //    UpdateNode(bestNode, childNodeRecord, g, h, f);
-            //    Open.AddToOpen(childNodeRecord);
-            //} else if (childNodeStatus == NodeStatus.Open && childNodeRecord.fValue > f) {
-            //    UpdateNode(bestNode, childNodeRecord, g, h, f);
-            //    Open.Replace(childNodeRecord, childNodeRecord);
-            //} else if (childNodeStatus == NodeStatus.Closed && childNodeRecord.fValue > f) {
-            //    UpdateNode(bestNode, childNodeRecord, g, h, f);
-            //    Closed.RemoveFromClosed(childNodeRecord);
-            //    Open.AddToOpen(childNodeRecord);
-            //}
         }
         
 
