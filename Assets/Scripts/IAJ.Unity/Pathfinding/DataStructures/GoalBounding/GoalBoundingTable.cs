@@ -146,17 +146,17 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
                 {
                     if (matrix[i] != null)
                     {
-                        NodeGoalBounds ngbInstance = ScriptableObject.CreateInstance<NodeGoalBounds>();
-                        ngbInstance.Init(table.Length);
-                        table[i] = ngbInstance;
                         if (matrix[i].Count == 0)
                         {
-                            var a = ScriptableObject.CreateInstance<NodeGoalBounds>();
-                            a.Init(0);
-                            table[i] = a;
+                            var newNodeGoalBound = ScriptableObject.CreateInstance<NodeGoalBounds>();
+                            newNodeGoalBound.Init(0);
+                            table[i] = newNodeGoalBound;
                         }
                         else
                         {
+                            NodeGoalBounds ngbInstance = ScriptableObject.CreateInstance<NodeGoalBounds>();
+                            ngbInstance.Init(table.Length);
+                            table[i] = ngbInstance;
                             for (int j = 0; j < matrix[i].Count; j++)
                             {
                                 if (matrix[i][j] != null)
