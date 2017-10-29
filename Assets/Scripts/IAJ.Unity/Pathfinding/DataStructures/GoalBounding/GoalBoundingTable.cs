@@ -149,18 +149,27 @@ namespace Assets.Scripts.IAJ.Unity.Pathfinding.DataStructures.GoalBounding
                         NodeGoalBounds ngbInstance = ScriptableObject.CreateInstance<NodeGoalBounds>();
                         ngbInstance.Init(table.Length);
                         table[i] = ngbInstance;
-                        for (int j = 0; j < matrix[i].Count; j++)
+                        if (matrix[i].Count == 0)
                         {
-                            if (matrix[i][j] != null)
+                            var a = ScriptableObject.CreateInstance<NodeGoalBounds>();
+                            a.Init(0);
+                            table[i] = a;
+                        }
+                        else
+                        {
+                            for (int j = 0; j < matrix[i].Count; j++)
                             {
-                                var bounds = ScriptableObject.CreateInstance<Bounds>();
-                                var entrie = matrix[i][j];
-                                bounds.Init(entrie.minx, entrie.maxx, entrie.minz, entrie.maxz);
-                                table[i].connectionBounds[j] = bounds;
-                            }
-                            else
-                            {
-                                table[i].connectionBounds[j] = null;
+                                if (matrix[i][j] != null)
+                                {
+                                    var bounds = ScriptableObject.CreateInstance<Bounds>();
+                                    var entry = matrix[i][j];
+                                    bounds.Init(entry.minx, entry.maxx, entry.minz, entry.maxz);
+                                    table[i].connectionBounds[j] = bounds;
+                                }
+                                else
+                                {
+                                    table[i].connectionBounds[j] = null;
+                                }
                             }
                         }
                     }
