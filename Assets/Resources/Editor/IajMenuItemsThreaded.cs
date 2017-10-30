@@ -49,8 +49,8 @@ namespace Assets.Resources.Editor
             int doneEventsIterator = 0;
             for (int i=0; i < nodes.Count; i++)
             {
-                //if (nodes[i] is NavMeshEdge)
-                //{
+                if (nodes[i] is NavMeshEdge)
+                {
                     //initialize the GoalBounds structure for the edge
                     var auxGoalBounds = ScriptableObject.CreateInstance<NodeGoalBounds>();
                     auxGoalBounds.connectionBounds =
@@ -80,7 +80,7 @@ namespace Assets.Resources.Editor
                     {
                         doneEventsIterator++;
                     }
-                //}
+                }
 
             }
             WaitHandle.WaitAll(doneEvents);

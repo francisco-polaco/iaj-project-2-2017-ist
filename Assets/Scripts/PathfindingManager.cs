@@ -295,8 +295,8 @@ namespace Assets.Scripts {
                         currentSolution.PathPositions.Insert(0, startPosition);
                         solutionIndex = 0;
                         //Smooth it
+
                         smoothedSolution = pathSmoothing.Smooth(currentSolution);
-                        smoothedSolution = pathSmoothing.Smooth(smoothedSolution);
                         smoothedSolution = pathSmoothing.Smooth(smoothedSolution);
                     }
                 }
